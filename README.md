@@ -7,6 +7,8 @@ Adivinhe o craque pela carreira: os escudos dos clubes por onde ele rodou aparec
 
 Site estático, sem build: basta abrir o `index.html` ou publicar a pasta (Vercel, Netlify, GitHub Pages…).
 
+> **Versão de teste:** com `MODO_TESTE = true` (no começo do script do `index.html`) o álbum mostra todas as figurinhas liberadas. Troque para `false` antes de publicar pra valer.
+
 ## Arquivos
 
 | Arquivo | O que é |
@@ -19,13 +21,23 @@ Site estático, sem build: basta abrir o `index.html` ou publicar a pasta (Verce
 
 ## Atualizar as carreiras
 
-As carreiras vêm da Wikipedia. Para incluir/remover jogadores, edite as listas `TOP`, `LENDAS` e `ETERNOS` em `ferramentas/gerar-dados.mjs` e rode (Node 18+):
+As carreiras vêm da Wikipedia. Os jogadores ficam na lista `JOGADORES` em `ferramentas/gerar-dados.mjs`, um por linha:
+
+```js
+['Título na Wikipedia', 'Nome exibido', OVR, 'POSIÇÃO', 'nível'],
+```
+
+- Níveis: `facil`, `medio`, `dificil`, `insano`, `lendas` (lendas = só aposentados).
+- Posições: `CA`, `ATA`, `PE`, `PD`, `MEI`, `MC`, `VOL`, `ZAG`, `LE`, `LD`, `GL`, `ME`, `MD`.
+- Carta: OVR 90+ preta, 84–89 ouro, até 83 prata; lendas usam a carta sépia.
+
+Depois de editar, rode (Node 18+). Sem `--atualizar` ele só busca jogadores novos; com `--atualizar` busca todas as carreiras de novo:
 
 ```bash
 node ferramentas/gerar-dados.mjs --atualizar
 ```
 
-Para mudar um jogador de nível, use `CORRECOES` no mesmo arquivo, ex.: `'bremer': { nivel:'dificil' }`.
+Para corrigir algo que veio errado da Wikipedia (nacionalidade, por exemplo), use `CORRECOES`; para trocar um escudo, `ESCUDOS_MANUAIS`.
 
 ## Aviso
 

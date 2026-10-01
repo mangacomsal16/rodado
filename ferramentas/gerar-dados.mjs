@@ -1,6 +1,7 @@
 // Gera dados.js (carreiras) e baixa os escudos a partir da Wikipedia em inglês.
-// Uso:  node ferramentas/gerar-dados.mjs
-// Para adicionar um jogador, inclua uma linha em TOP, LENDAS ou ETERNOS e rode de novo.
+// Uso:  node ferramentas/gerar-dados.mjs              (usa o cache; só busca jogadores novos)
+//       node ferramentas/gerar-dados.mjs --atualizar  (busca tudo de novo: carreiras com as últimas transferências)
+// Para adicionar um jogador, inclua uma linha em JOGADORES e rode de novo.
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -11,163 +12,162 @@ const CACHE = path.join(os.tmpdir(), 'trajetoria-cache');
 const UA = { 'User-Agent': 'trajetoria-quiz/0.2 (projeto pessoal de fã)' };
 const REFRESH = process.argv.includes('--atualizar'); // ignora o cache
 
-// [título na Wikipedia, nome exibido, OVR, posição (sigla), clube atual segundo a lista de OVR]
-const TOP = [
-  ['Erling Haaland','Erling Haaland',91,'ATA','Manchester City'],
-  ['Kylian Mbappé','Kylian Mbappé',91,'ATA','Real Madrid'],
-  ['Lamine Yamal','Lamine Yamal',90,'PD','FC Barcelona'],
-  ['Vitinha (footballer, born 2000)','Vitinha',90,'MC','Paris Saint-Germain'],
-  ['Jude Bellingham','Jude Bellingham',90,'MEI','Real Madrid'],
-  ['Pedri','Pedri',90,'MC','FC Barcelona'],
-  ['Michael Olise','Michael Olise',90,'MD','Bayern München'],
-  ['Rodri (footballer, born 1996)','Rodri',90,'VOL','FC Barcelona'],
-  ['Ousmane Dembélé','Ousmane Dembélé',90,'ATA','Paris Saint-Germain'],
-  ['Harry Kane','Harry Kane',90,'ATA','Bayern München'],
-  ['Thibaut Courtois','Thibaut Courtois',90,'GL','Real Madrid'],
-  ['Willian Pacho','Willian Pacho',89,'ZAG','Paris Saint-Germain'],
-  ['Nuno Mendes (footballer, born 2002)','Nuno Mendes',89,'LE','Paris Saint-Germain'],
-  ['Khvicha Kvaratskhelia','Khvicha Kvaratskhelia',89,'PE','Paris Saint-Germain'],
-  ['Vinícius Júnior','Vinícius Júnior',89,'PE','Real Madrid'],
-  ['Gabriel Magalhães','Gabriel Magalhães',89,'ZAG','Arsenal FC'],
-  ['Gianluigi Donnarumma','Gianluigi Donnarumma',89,'GL','Manchester City'],
-  ['Bruno Fernandes','Bruno Fernandes',89,'MEI','Manchester United'],
-  ['Lionel Messi','Lionel Messi',89,'MEI','Inter Miami'],
-  ['João Neves','João Neves',88,'MC','Paris Saint-Germain'],
-  ['William Saliba','William Saliba',88,'ZAG','Arsenal FC'],
-  ['Luis Díaz (footballer, born 1997)','Luis Díaz',88,'ME','Bayern München'],
-  ['Achraf Hakimi','Achraf Hakimi',88,'LD','Paris Saint-Germain'],
-  ['Declan Rice','Declan Rice',88,'VOL','Arsenal FC'],
-  ['Raphinha','Raphinha',88,'PE','FC Barcelona'],
-  ['David Raya','David Raya',88,'GL','Arsenal FC'],
-  ['Joshua Kimmich','Joshua Kimmich',88,'VOL','Bayern München'],
-  ['Virgil van Dijk','Virgil van Dijk',88,'ZAG','Liverpool FC'],
-  ['Jan Oblak','Jan Oblak',88,'GL','Atlético Madrid'],
-  ['Jamal Musiala','Jamal Musiala',87,'MEI','Bayern München'],
-  ['Nico Schlotterbeck','Nico Schlotterbeck',87,'ZAG','Borussia Dortmund'],
-  ['Bukayo Saka','Bukayo Saka',87,'PD','Arsenal FC'],
-  ['Rúben Dias','Rúben Dias',87,'ZAG','Manchester City'],
-  ['Federico Valverde','Federico Valverde',87,'MC','Real Madrid'],
-  ['Gregor Kobel','Gregor Kobel',87,'GL','Borussia Dortmund'],
-  ['Lautaro Martínez','Lautaro Martínez',87,'ATA','Inter Milan'],
-  ['Dayot Upamecano','Dayot Upamecano',87,'ZAG','Bayern München'],
-  ['Nicolò Barella','Nicolò Barella',87,'MC','Inter Milan'],
-  ['Mike Maignan','Mike Maignan',87,'GL','AC Milan'],
-  ['Jonathan Tah','Jonathan Tah',87,'ZAG','Bayern München'],
-  ['Alisson Becker','Alisson',87,'GL','Liverpool FC'],
-  ['Mohamed Salah','Mohamed Salah',87,'MD','Trabzonspor'],
-  ['Marquinhos','Marquinhos',87,'ZAG','Paris Saint-Germain'],
-  ['Pau Cubarsí','Pau Cubarsí',86,'ZAG','FC Barcelona'],
-  ['Désiré Doué','Désiré Doué',86,'PD','Paris Saint-Germain'],
-  ['Joan Garcia','Joan García',86,'GL','FC Barcelona'],
-  ['Florian Wirtz','Florian Wirtz',86,'MEI','Liverpool FC'],
-  ['Moisés Caicedo','Moisés Caicedo',86,'VOL','Chelsea FC'],
-  ['Marco Carnesecchi','Marco Carnesecchi',86,'GL','Atalanta BC'],
-  ['Rayan Cherki','Rayan Cherki',86,'PD','Manchester City'],
-  ['Bruno Guimarães','Bruno Guimarães',86,'MC','Arsenal FC'],
-  ['Enzo Fernández','Enzo Fernández',86,'MC','Manchester City'],
-  ['Julián Alvarez','Julián Álvarez',86,'ATA','Atlético Madrid'],
-  ['Viktor Gyökeres','Viktor Gyökeres',86,'ATA','Arsenal FC'],
-  ['Gleison Bremer','Bremer',86,'ZAG','Juventus FC'],
-  ['Marc Cucurella','Marc Cucurella',86,'LE','Real Madrid'],
-  ['Alessandro Bastoni','Alessandro Bastoni',86,'ZAG','Inter Milan'],
-  ['Scott McTominay','Scott McTominay',86,'MC','SSC Napoli'],
-  ['Dominik Szoboszlai','Dominik Szoboszlai',86,'MEI','Liverpool FC'],
-  ['Diogo Costa','Diogo Costa',86,'GL','FC Porto'],
-  ['Alexander Isak','Alexander Isak',86,'ATA','Liverpool FC'],
-  ['Frenkie de Jong','Frenkie de Jong',86,'MC','FC Barcelona'],
-  ['Fabián Ruiz','Fabián Ruiz',86,'MC','Paris Saint-Germain'],
-  ['Federico Dimarco','Federico Dimarco',86,'LE','Inter Milan'],
-  ['Martin Ødegaard','Martin Ødegaard',86,'MC','Arsenal FC'],
-  ['Fermín López','Fermín López',85,'MEI','FC Barcelona'],
-  ['Bradley Barcola','Bradley Barcola',85,'PE','Liverpool FC'],
-  ['Cole Palmer','Cole Palmer',85,'MEI','Chelsea FC'],
-  ['Hugo Ekitike','Hugo Ekitiké',85,'ATA','Liverpool FC'],
-  ['Joško Gvardiol','Joško Gvardiol',85,'ZAG','Manchester City'],
-  ['Felix Nmecha','Felix Nmecha',85,'MC','Borussia Dortmund'],
-  ['Ryan Gravenberch','Ryan Gravenberch',85,'VOL','Liverpool FC'],
-  ['Eric García (footballer, born 2001)','Eric García',85,'ZAG','FC Barcelona'],
-  ['Deniz Undav','Deniz Undav',85,'ATA','VfB Stuttgart'],
-  ['Jules Koundé','Jules Koundé',85,'LD','FC Barcelona'],
-  ['Antoine Semenyo','Antoine Semenyo',85,'PD','Manchester City'],
-  ['Marc Guéhi','Marc Guéhi',85,'ZAG','Manchester City'],
-  ['Sandro Tonali','Sandro Tonali',85,'VOL','Tottenham Hotspur'],
-  ['Victor Osimhen','Victor Osimhen',85,'ATA','Galatasaray SK'],
-  ['Mile Svilar','Mile Svilar',85,'GL','AS Roma'],
-  ['Unai Simón','Unai Simón',85,'GL','Athletic Club'],
-  ['Marcus Thuram','Marcus Thuram',85,'ATA','Inter Milan'],
-  ['Marcos Llorente','Marcos Llorente',85,'LD','Atlético Madrid'],
-  ['Konrad Laimer','Konrad Laimer',85,'LD','Bayern München'],
-  ['Rúben Neves','Rúben Neves',85,'VOL','Al Hilal'],
-  ['Youri Tielemans','Youri Tielemans',85,'MC','Manchester United'],
-  ['Serhou Guirassy','Serhou Guirassy',85,'ATA','Borussia Dortmund'],
-  ['Paulo Dybala','Paulo Dybala',85,'MEI','AS Roma'],
-  ['Alejandro Grimaldo','Grimaldo',85,'ME','Atlético Madrid'],
-  ['Adrien Rabiot','Adrien Rabiot',85,'MC','AC Milan'],
-  ['Hakan Çalhanoğlu','Hakan Çalhanoğlu',85,'VOL','Inter Milan'],
-  ['Jordan Pickford','Jordan Pickford',85,'GL','Everton FC'],
-  ['Emiliano Martínez','Emiliano Martínez',85,'GL','Chelsea FC'],
-  ['Granit Xhaka','Granit Xhaka',85,'VOL','Sunderland AFC'],
-  ['Kevin De Bruyne','Kevin De Bruyne',85,'MEI','SSC Napoli'],
-  ['Luka Modrić','Luka Modrić',85,'MC','AC Milan'],
-  ['Kenan Yıldız','Kenan Yıldız',84,'MEI','Juventus FC'],
-  ['Nico Paz','Nico Paz',84,'MEI','Como'],
-  ['Morgan Rogers','Morgan Rogers',84,'MEI','Chelsea FC'],
-  ['Nico Williams','Nico Williams',84,'PE','Athletic Club'],
-  ['Piero Hincapié','Piero Hincapié',84,'LE','Arsenal FC'],
-  ['Elliot Anderson','Elliot Anderson',84,'VOL','Manchester City'],
-  ['Jurriën Timber','Jurriën Timber',84,'LD','Arsenal FC'],
-  ['Martín Zubimendi','Martín Zubimendi',84,'VOL','Arsenal FC'],
-  ['Jérémy Doku','Jérémy Doku',84,'PE','Manchester City'],
-  ['Dani Olmo','Dani Olmo',84,'MEI','FC Barcelona'],
-  ['Rodrygo','Rodrygo',84,'PE','Real Madrid'],
-  ['Bryan Mbeumo','Bryan Mbeumo',84,'MD','Manchester United'],
-  ['Aurélien Tchouaméni','Aurélien Tchouaméni',84,'VOL','Real Madrid'],
-  ['Ferran Torres','Ferran Torres',84,'ATA','Paris Saint-Germain'],
-  ['Tijjani Reijnders','Tijjani Reijnders',84,'MC','Al Qadsiah FC'],
-  ['Matheus Cunha','Matheus Cunha',84,'ME','Manchester United'],
-  ['Éder Militão','Éder Militão',84,'ZAG','Real Madrid'],
-  ['Alexis Mac Allister','Alexis Mac Allister',84,'MC','Liverpool FC'],
-  ['Reece James (footballer, born 1999)','Reece James',84,'LD','Chelsea FC'],
-  ['Phil Foden','Phil Foden',84,'MEI','Manchester City'],
-  ['Ibrahima Konaté','Ibrahima Konaté',84,'ZAG','Real Madrid'],
-  ['Boubacar Kamara','Boubacar Kamara',84,'VOL','Aston Villa'],
-  ['Eberechi Eze','Eberechi Eze',84,'MEI','Arsenal FC'],
-  ['Julián Quiñones','Julián Quiñones',84,'ATA','Al Qadsiah FC'],
-];
-
-// Lendas ainda em atividade (muitas em ligas alternativas): [título, nome, posição]
-const LENDAS = [
-  ['Cristiano Ronaldo','Cristiano Ronaldo','ATA'],
-  ['Neymar','Neymar','ATA'],
-  ['Luis Suárez (Uruguayan footballer)','Luis Suárez','ATA'],
-  ['Antoine Griezmann','Antoine Griezmann','ATA'],
-  ['Robert Lewandowski','Robert Lewandowski','ATA'],
-  ['Thomas Müller','Thomas Müller','MEI'],
-  ['Ángel Di María','Ángel Di María','PD'],
-  ['James Rodríguez','James Rodríguez','MEI'],
-  ['Son Heung-min','Son Heung-min','ATA'],
-  ['Marco Reus','Marco Reus','MEI'],
-  ['Memphis Depay','Memphis Depay','ATA'],
-  ['Thiago Silva','Thiago Silva','ZAG'],
-  ['Sadio Mané','Sadio Mané','PE'],
-  ["N'Golo Kanté","N'Golo Kanté",'VOL'],
-  ['Philippe Coutinho','Philippe Coutinho','MEI'],
-  ['Hulk (footballer)','Hulk','ATA'],
-  ['Casemiro','Casemiro','VOL'],
-];
-
-// Ídolos aposentados ou sem clube no momento: [título, nome, posição]
-const ETERNOS = [
-  ['Karim Benzema','Karim Benzema','ATA'],
-  ['Sergio Ramos','Sergio Ramos','ZAG'],
-  ['Edinson Cavani','Edinson Cavani','ATA'],
-  ['Riyad Mahrez','Riyad Mahrez','PD'],
-  ['Paul Pogba','Paul Pogba','MC'],
-  ['Ronaldo (Brazilian footballer)','Ronaldo Nazário','ATA'],
-  ['Ronaldinho','Ronaldinho Gaúcho','MEI'],
-  ['Kaká','Kaká','MEI'],
-  ['Zlatan Ibrahimović','Zlatan Ibrahimović','ATA'],
-  ['David Beckham','David Beckham','MC'],
+// Um jogador por linha: [título na Wikipedia, nome exibido, OVR, posição (sigla), nível]
+// Níveis: facil, medio, dificil, insano, lendas (lendas = só aposentados).
+// Dentro de cada nível a ordem não importa: o jogo ordena por OVR.
+const JOGADORES = [
+  // ---- Fácil (33) ----
+  ['Lionel Messi', 'Lionel Messi', 99, 'MEI', 'facil'],
+  ['Cristiano Ronaldo', 'Cristiano Ronaldo', 98, 'CA', 'facil'],
+  ['Neymar', 'Neymar', 96, 'MEI', 'facil'],
+  ['Sergio Ramos', 'Sergio Ramos', 94, 'ZAG', 'facil'],
+  ['Luis Suárez (Uruguayan footballer)', 'Luis Suárez', 93, 'CA', 'facil'],
+  ['Robert Lewandowski', 'Robert Lewandowski', 93, 'CA', 'facil'],
+  ['Karim Benzema', 'Karim Benzema', 93, 'CA', 'facil'],
+  ['Thiago Silva', 'Thiago Silva', 92, 'ZAG', 'facil'],
+  ['Thomas Müller', 'Thomas Müller', 92, 'MEI', 'facil'],
+  ['Erling Haaland', 'Erling Haaland', 91, 'ATA', 'facil'],
+  ['Kylian Mbappé', 'Kylian Mbappé', 91, 'ATA', 'facil'],
+  ['Antoine Griezmann', 'Antoine Griezmann', 91, 'MEI', 'facil'],
+  ['Ángel Di María', 'Ángel Di María', 91, 'PE', 'facil'],
+  ['Lamine Yamal', 'Lamine Yamal', 90, 'PD', 'facil'],
+  ['Jude Bellingham', 'Jude Bellingham', 90, 'MEI', 'facil'],
+  ['Pedri', 'Pedri', 90, 'MC', 'facil'],
+  ['Michael Olise', 'Michael Olise', 90, 'MD', 'facil'],
+  ['Harry Kane', 'Harry Kane', 90, 'ATA', 'facil'],
+  ['Thibaut Courtois', 'Thibaut Courtois', 90, 'GL', 'facil'],
+  ['Philippe Coutinho', 'Philippe Coutinho', 90, 'PE', 'facil'],
+  ['Ousmane Dembélé', 'Ousmane Dembélé', 89, 'ATA', 'facil'],
+  ['Vinícius Júnior', 'Vinícius Júnior', 89, 'PE', 'facil'],
+  ['Raphinha', 'Raphinha', 88, 'PE', 'facil'],
+  ['Virgil van Dijk', 'Virgil van Dijk', 88, 'ZAG', 'facil'],
+  ['Rodri (footballer, born 1996)', 'Rodri', 88, 'VOL', 'facil'],
+  ['Lautaro Martínez', 'Lautaro Martínez', 87, 'ATA', 'facil'],
+  ['Alisson Becker', 'Alisson', 87, 'GL', 'facil'],
+  ['Mohamed Salah', 'Mohamed Salah', 87, 'MD', 'facil'],
+  ['Julián Alvarez', 'Julián Álvarez', 86, 'ATA', 'facil'],
+  ['Paulo Dybala', 'Paulo Dybala', 85, 'MEI', 'facil'],
+  ['Kevin De Bruyne', 'Kevin De Bruyne', 85, 'MEI', 'facil'],
+  ['Luka Modrić', 'Luka Modrić', 85, 'MC', 'facil'],
+  ['Rodrygo', 'Rodrygo', 84, 'PE', 'facil'],
+  // ---- Médio (48) ----
+  ['Sadio Mané', 'Sadio Mané', 91, 'PE', 'medio'],
+  ['N\'Golo Kanté', 'N\'Golo Kanté', 91, 'VOL', 'medio'],
+  ['Casemiro', 'Casemiro', 91, 'VOL', 'medio'],
+  ['Son Heung-min', 'Son Heung-min', 90, 'PE', 'medio'],
+  ['Marco Reus', 'Marco Reus', 90, 'MEI', 'medio'],
+  ['Memphis Depay', 'Memphis Depay', 90, 'CA', 'medio'],
+  ['Edinson Cavani', 'Edinson Cavani', 90, 'CA', 'medio'],
+  ['Paul Pogba', 'Paul Pogba', 90, 'MC', 'medio'],
+  ['James Rodríguez', 'James Rodríguez', 89, 'MEI', 'medio'],
+  ['Gianluigi Donnarumma', 'Gianluigi Donnarumma', 89, 'GL', 'medio'],
+  ['Achraf Hakimi', 'Achraf Hakimi', 88, 'LD', 'medio'],
+  ['Declan Rice', 'Declan Rice', 88, 'VOL', 'medio'],
+  ['David Raya', 'David Raya', 88, 'GL', 'medio'],
+  ['Joshua Kimmich', 'Joshua Kimmich', 88, 'VOL', 'medio'],
+  ['Khvicha Kvaratskhelia', 'Khvicha Kvaratskhelia', 87, 'PE', 'medio'],
+  ['Bruno Fernandes', 'Bruno Fernandes', 87, 'MC', 'medio'],
+  ['Jamal Musiala', 'Jamal Musiala', 87, 'MEI', 'medio'],
+  ['Bukayo Saka', 'Bukayo Saka', 87, 'PD', 'medio'],
+  ['Rúben Dias', 'Rúben Dias', 87, 'ZAG', 'medio'],
+  ['Federico Valverde', 'Federico Valverde', 87, 'MC', 'medio'],
+  ['Marquinhos', 'Marquinhos', 87, 'ZAG', 'medio'],
+  ['Hulk (footballer)', 'Hulk', 87, 'PE', 'medio'],
+  ['Riyad Mahrez', 'Riyad Mahrez', 87, 'PD', 'medio'],
+  ['Pau Cubarsí', 'Pau Cubarsí', 86, 'ZAG', 'medio'],
+  ['Désiré Doué', 'Désiré Doué', 86, 'PD', 'medio'],
+  ['Rayan Cherki', 'Rayan Cherki', 86, 'PD', 'medio'],
+  ['Bruno Guimarães', 'Bruno Guimarães', 86, 'MC', 'medio'],
+  ['Viktor Gyökeres', 'Viktor Gyökeres', 86, 'ATA', 'medio'],
+  ['Marc Cucurella', 'Marc Cucurella', 86, 'LE', 'medio'],
+  ['Dominik Szoboszlai', 'Dominik Szoboszlai', 86, 'MEI', 'medio'],
+  ['Alexander Isak', 'Alexander Isak', 86, 'ATA', 'medio'],
+  ['Frenkie de Jong', 'Frenkie de Jong', 86, 'MC', 'medio'],
+  ['Martin Ødegaard', 'Martin Ødegaard', 86, 'MC', 'medio'],
+  ['Enzo Fernández', 'Enzo Fernández', 85, 'MC', 'medio'],
+  ['Fermín López', 'Fermín López', 85, 'MEI', 'medio'],
+  ['Bradley Barcola', 'Bradley Barcola', 85, 'PE', 'medio'],
+  ['Cole Palmer', 'Cole Palmer', 85, 'MEI', 'medio'],
+  ['Victor Osimhen', 'Victor Osimhen', 85, 'ATA', 'medio'],
+  ['Youri Tielemans', 'Youri Tielemans', 85, 'MC', 'medio'],
+  ['Morgan Rogers', 'Morgan Rogers', 84, 'MEI', 'medio'],
+  ['Nico Williams', 'Nico Williams', 84, 'PE', 'medio'],
+  ['Dani Olmo', 'Dani Olmo', 84, 'MEI', 'medio'],
+  ['Ferran Torres', 'Ferran Torres', 84, 'CA', 'medio'],
+  ['Tijjani Reijnders', 'Tijjani Reijnders', 84, 'MC', 'medio'],
+  ['Matheus Cunha', 'Matheus Cunha', 84, 'ME', 'medio'],
+  ['Alexis Mac Allister', 'Alexis Mac Allister', 84, 'MC', 'medio'],
+  ['Phil Foden', 'Phil Foden', 84, 'MEI', 'medio'],
+  ['Ibrahima Konaté', 'Ibrahima Konaté', 84, 'ZAG', 'medio'],
+  // ---- Difícil (36) ----
+  ['Vitinha (footballer, born 2000)', 'Vitinha', 90, 'MC', 'dificil'],
+  ['Nuno Mendes (footballer, born 2002)', 'Nuno Mendes', 89, 'LE', 'dificil'],
+  ['Gabriel Magalhães', 'Gabriel Magalhães', 89, 'ZAG', 'dificil'],
+  ['João Neves', 'João Neves', 88, 'MC', 'dificil'],
+  ['William Saliba', 'William Saliba', 88, 'ZAG', 'dificil'],
+  ['Luis Díaz (footballer, born 1997)', 'Luis Díaz', 88, 'ME', 'dificil'],
+  ['Jan Oblak', 'Jan Oblak', 88, 'GL', 'dificil'],
+  ['Emiliano Martínez', 'Emiliano Martínez', 87, 'GL', 'dificil'],
+  ['Joan Garcia', 'Joan García', 86, 'GL', 'dificil'],
+  ['Florian Wirtz', 'Florian Wirtz', 86, 'MEI', 'dificil'],
+  ['Moisés Caicedo', 'Moisés Caicedo', 86, 'VOL', 'dificil'],
+  ['Diogo Costa', 'Diogo Costa', 86, 'GL', 'dificil'],
+  ['Fabián Ruiz', 'Fabián Ruiz', 86, 'MC', 'dificil'],
+  ['Eric García (footballer, born 2001)', 'Eric García', 85, 'ZAG', 'dificil'],
+  ['Jules Koundé', 'Jules Koundé', 85, 'LD', 'dificil'],
+  ['Marc Guéhi', 'Marc Guéhi', 85, 'ZAG', 'dificil'],
+  ['Sandro Tonali', 'Sandro Tonali', 85, 'VOL', 'dificil'],
+  ['Unai Simón', 'Unai Simón', 85, 'GL', 'dificil'],
+  ['Marcos Llorente', 'Marcos Llorente', 85, 'LD', 'dificil'],
+  ['Alejandro Grimaldo', 'Grimaldo', 85, 'ME', 'dificil'],
+  ['Adrien Rabiot', 'Adrien Rabiot', 85, 'MC', 'dificil'],
+  ['Hakan Çalhanoğlu', 'Hakan Çalhanoğlu', 85, 'VOL', 'dificil'],
+  ['Jordan Pickford', 'Jordan Pickford', 85, 'GL', 'dificil'],
+  ['Granit Xhaka', 'Granit Xhaka', 85, 'VOL', 'dificil'],
+  ['Aurélien Tchouaméni', 'Aurélien Tchouaméni', 85, 'VOL', 'dificil'],
+  ['Kenan Yıldız', 'Kenan Yıldız', 84, 'MEI', 'dificil'],
+  ['Elliot Anderson', 'Elliot Anderson', 84, 'VOL', 'dificil'],
+  ['Éder Militão', 'Éder Militão', 84, 'ZAG', 'dificil'],
+  ['Reece James (footballer, born 1999)', 'Reece James', 84, 'LD', 'dificil'],
+  ['Martín Zubimendi', 'Martín Zubimendi', 84, 'VOL', 'dificil'],
+  ['Konrad Laimer', 'Konrad Laimer', 84, 'LD', 'dificil'],
+  ['Ryan Gravenberch', 'Ryan Gravenberch', 84, 'VOL', 'dificil'],
+  ['Joško Gvardiol', 'Joško Gvardiol', 84, 'ZAG', 'dificil'],
+  ['Scott McTominay', 'Scott McTominay', 84, 'MC', 'dificil'],
+  ['Eberechi Eze', 'Eberechi Eze', 83, 'MEI', 'dificil'],
+  // ---- Insano (25) ----
+  ['Willian Pacho', 'Willian Pacho', 87, 'ZAG', 'insano'],
+  ['Nico Schlotterbeck', 'Nico Schlotterbeck', 86, 'ZAG', 'insano'],
+  ['Gregor Kobel', 'Gregor Kobel', 86, 'GL', 'insano'],
+  ['Jonathan Tah', 'Jonathan Tah', 86, 'ZAG', 'insano'],
+  ['Alessandro Bastoni', 'Alessandro Bastoni', 86, 'ZAG', 'insano'],
+  ['Dayot Upamecano', 'Dayot Upamecano', 85, 'ZAG', 'insano'],
+  ['Nicolò Barella', 'Nicolò Barella', 85, 'MC', 'insano'],
+  ['Mike Maignan', 'Mike Maignan', 85, 'GL', 'insano'],
+  ['Gleison Bremer', 'Bremer', 85, 'ZAG', 'insano'],
+  ['Federico Dimarco', 'Federico Dimarco', 85, 'LE', 'insano'],
+  ['Antoine Semenyo', 'Antoine Semenyo', 85, 'PD', 'insano'],
+  ['Serhou Guirassy', 'Serhou Guirassy', 85, 'ATA', 'insano'],
+  ['Marco Carnesecchi', 'Marco Carnesecchi', 84, 'GL', 'insano'],
+  ['Hugo Ekitike', 'Hugo Ekitiké', 84, 'ATA', 'insano'],
+  ['Felix Nmecha', 'Felix Nmecha', 84, 'MC', 'insano'],
+  ['Mile Svilar', 'Mile Svilar', 84, 'GL', 'insano'],
+  ['Marcus Thuram', 'Marcus Thuram', 84, 'ATA', 'insano'],
+  ['Rúben Neves', 'Rúben Neves', 84, 'VOL', 'insano'],
+  ['Jurriën Timber', 'Jurriën Timber', 84, 'LD', 'insano'],
+  ['Jérémy Doku', 'Jérémy Doku', 84, 'PE', 'insano'],
+  ['Bryan Mbeumo', 'Bryan Mbeumo', 84, 'MD', 'insano'],
+  ['Boubacar Kamara', 'Boubacar Kamara', 83, 'VOL', 'insano'],
+  ['Piero Hincapié', 'Piero Hincapié', 83, 'LE', 'insano'],
+  ['Deniz Undav', 'Deniz Undav', 83, 'ATA', 'insano'],
+  ['Nico Paz', 'Nico Paz', 83, 'MEI', 'insano'],
+  ['Julián Quiñones', 'Julián Quiñones', 82, 'ATA', 'insano'],
+  // ---- Lendas (só aposentados) (5) ----
+  ['Ronaldo (Brazilian footballer)', 'Ronaldo Nazário', 97, 'CA', 'lendas'],
+  ['Ronaldinho', 'Ronaldinho Gaúcho', 95, 'MEI', 'lendas'],
+  ['Kaká', 'Kaká', 93, 'MEI', 'lendas'],
+  ['Zlatan Ibrahimović', 'Zlatan Ibrahimović', 93, 'CA', 'lendas'],
+  ['David Beckham', 'David Beckham', 92, 'MEI', 'lendas'],
 ];
 
 const APELIDOS = {
@@ -179,7 +179,7 @@ const APELIDOS = {
   'Fermín López':['fermin'], 'Rodri':['rodrigo hernandez'], 'Hulk':['givanildo'], 'Son Heung-min':['son','sonny'],
 };
 
-const POS = { ATA:'Atacante', PE:'Ponta-esquerda', PD:'Ponta-direita', MEI:'Meia', MC:'Meio-campo', VOL:'Volante',
+const POS = { CA:'Centroavante', ATA:'Atacante', PE:'Ponta-esquerda', PD:'Ponta-direita', MEI:'Meia', MC:'Meio-campo', VOL:'Volante',
   ZAG:'Zagueiro', LE:'Lateral-esquerdo', LD:'Lateral-direito', GL:'Goleiro', ME:'Meia-esquerda', MD:'Meia-direita' };
 
 const PAISES = { Norway:'Noruega', France:'França', Spain:'Espanha', Portugal:'Portugal', England:'Inglaterra',
@@ -246,6 +246,12 @@ const NOMES_CLUBES = {
   'Fenerbahçe S.K. (football)':'Fenerbahçe', 'Al-Ittihad Club (Jeddah)':'Al-Ittihad', 'Preston North End F.C.':'Preston',
 };
 
+// Escudo escolhido à mão quando a página do clube não traz o escudo como imagem principal (ou traz o errado).
+// chave = título da página do clube; valor = nome do arquivo na Wikipedia (sem o "File:")
+const ESCUDOS_MANUAIS = {
+  'Newcastle United F.C.':'Newcastle United Logo.svg',
+};
+
 // Times B / reservas / sub-23 ficam de fora da carreira
 const RESERVA = /((?<!Willem)\s(B|C|II|III|2|3)$|\bU-?\d{2}\b|Under-\d{2}|Reserves|Next Gen|Castilla|\sAtl[eéè]tic(o)?$|Mestalla|Bilbao Athletic|Betis Deportivo|Celta Fortuna|^Jong\s|Academy|Primavera|Juvenil|\(youth\))/i;
 
@@ -256,7 +262,9 @@ const CORRECOES = {
 
 /* ------------------------------------------------------------------ */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+// letras que não se decompõem no NFD (ø, ı, æ…) viram a letra simples: Ødegaard → odegaard, Yıldız → yildiz
+const SIMPLES = { ø:'o', Ø:'o', ı:'i', İ:'i', æ:'ae', Æ:'ae', œ:'oe', Œ:'oe', ß:'ss', đ:'d', Đ:'d', ł:'l', Ł:'l', ð:'d', þ:'th' };
+const slug = s => s.replace(/[øØıİæÆœŒßđĐłŁðþ]/g, c => SIMPLES[c]).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
 async function api(params, wiki = 'en.wikipedia.org'){
   const url = `https://${wiki}/w/api.php?` + new URLSearchParams({ format:'json', formatversion:'2', maxlag:'5', ...params });
@@ -367,11 +375,12 @@ function nationality(box){
 }
 
 /* ------------------------------------------------------------------ */
-const lista = [
-  ...TOP.map(([t, nome, ovr, pos, clubeLista]) => ({ t, nome, ovr, pos, clubeLista, sec:'top' })),
-  ...LENDAS.map(([t, nome, pos]) => ({ t, nome, pos, sec:'lenda' })),
-  ...ETERNOS.map(([t, nome, pos]) => ({ t, nome, pos, sec:'eterno' })),
-];
+const NIVEIS = ['facil', 'medio', 'dificil', 'insano', 'lendas'];
+const lista = JOGADORES.map(([t, nome, ovr, pos, nivel]) => {
+  if (!NIVEIS.includes(nivel)) throw new Error(`nível inválido para ${nome}: "${nivel}" (use ${NIVEIS.join(', ')})`);
+  if (!POS[pos]) throw new Error(`posição inválida para ${nome}: "${pos}" (use ${Object.keys(POS).join(', ')})`);
+  return { t, nome, ovr, pos, nivel };
+});
 
 await prefetch(lista.map(j => j.t));
 
@@ -392,7 +401,7 @@ for (const j of lista) {
   if (!pais && !CORRECOES[slug(j.nome)]?.pais) avisos.push(`SEM SELEÇÃO: ${j.nome}`);
   else if (pais && !PAISES[pais]) avisos.push(`PAÍS SEM TRADUÇÃO: ${pais} (${j.nome})`);
   if (!senior.length) avisos.push(`SEM CLUBES: ${j.nome}`);
-  if (j.sec === 'lenda' && senior.at(-1)?.b !== null) avisos.push(`LENDA PARECE APOSENTADA: ${j.nome} (último: ${senior.at(-1)?.text} ${senior.at(-1)?.b})`);
+  if (j.nivel === 'lendas' && senior.some(c => c.b === null)) avisos.push(`LENDA AINDA EM ATIVIDADE segundo a Wikipedia: ${j.nome} (${senior.find(c => c.b === null).text} ${senior.find(c => c.b === null).a}–hoje)`);
   brutos.push({ ...j, wiki:title, pais:PAISES[pais] || pais, senior, atualWiki:link(box.currentclub)?.text || '—' });
 }
 
@@ -406,6 +415,15 @@ for (let i = 0; i < alvos.length; i += 50) {
   for (const a of alvos.slice(i, i + 50)) { let t = norm[a] || a; t = redir[t] || t; resolvido[a] = t; }
   for (const p of d.query.pages) imagens[p.title] = p.thumbnail?.source || null;
   await sleep(150);
+}
+const manuais = Object.entries(ESCUDOS_MANUAIS);
+if (manuais.length) {
+  const d = await api({ action:'query', prop:'imageinfo', iiprop:'url', iiurlwidth:'160', titles:manuais.map(([, arq]) => 'File:' + arq).join('|') });
+  for (const [clube, arq] of manuais) {
+    const p = d.query.pages.find(x => x.title === 'File:' + arq);
+    if (p?.imageinfo) imagens[clube] = p.imageinfo[0].thumburl;
+    else avisos.push(`ESCUDO MANUAL NÃO ENCONTRADO: ${arq} (${clube})`);
+  }
 }
 
 // ---- carreiras ----
@@ -453,68 +471,9 @@ for (const id of Object.keys(textos).sort()) {
 const usados = new Set(Object.values(clubes).map(c => c.img?.slice('escudos/'.length)));
 for (const f of fs.readdirSync(dirEsc)) if (!usados.has(f)) fs.unlinkSync(path.join(dirEsc, f));
 
-// ---- fama → níveis ----
-// Fama = visitas à página do jogador na Wikipedia (inglês e português) nos últimos 60 dias.
-// O ranking final é a média das duas posições, pra pesar quem é conhecido no mundo e no Brasil.
-const NIVEIS = ['facil', 'medio', 'dificil', 'insano'];
-const cacheVisitas = path.join(CACHE, 'visitas.json');
-const visitasSalvas = !REFRESH && fs.existsSync(cacheVisitas) ? JSON.parse(fs.readFileSync(cacheVisitas, 'utf8')) : {};
-
-// soma das visitas diárias, 50 páginas por pedido
-async function visitas(wiki, titulos){
-  const out = {};
-  const falta = titulos.filter(t => t && visitasSalvas[`${wiki}:${t}`] === undefined);
-  for (let i = 0; i < falta.length; i += 50) {
-    let cont = {};
-    do {
-      const d = await api({ action:'query', prop:'pageviews', pvipdays:'60', titles:falta.slice(i, i + 50).join('|'), ...cont }, wiki);
-      for (const p of d.query.pages) if (p.pageviews) visitasSalvas[`${wiki}:${p.title}`] = Object.values(p.pageviews).reduce((s, v) => s + (v || 0), 0);
-      cont = d.continue || null;
-      await sleep(1000);
-    } while (cont);
-  }
-  fs.writeFileSync(cacheVisitas, JSON.stringify(visitasSalvas));
-  for (const t of titulos) if (t) out[t] = visitasSalvas[`${wiki}:${t}`] || 0;
-  return out;
-}
-
-const tituloPt = {};
-for (let i = 0; i < jogadores.length; i += 50) {
-  const d = await api({ action:'query', prop:'langlinks', lllang:'pt', lllimit:'max', titles:jogadores.slice(i, i + 50).map(j => j.wiki).join('|') });
-  for (const p of d.query.pages) tituloPt[p.title] = p.langlinks?.[0]?.title || null;
-  await sleep(1000);
-}
-const vEn = await visitas('en.wikipedia.org', jogadores.map(j => j.wiki));
-const vPt = await visitas('pt.wikipedia.org', jogadores.map(j => tituloPt[j.wiki]));
-for (const j of jogadores) { j.vEn = vEn[j.wiki] || 0; j.vPt = vPt[tituloPt[j.wiki]] || 0; }
-// fama de longo prazo: em quantas Wikipedias (idiomas) o jogador tem artigo — não oscila com notícia de transferência
-const qid = {};
-for (let i = 0; i < jogadores.length; i += 50) {
-  const d = await api({ action:'query', prop:'pageprops', ppprop:'wikibase_item', titles:jogadores.slice(i, i + 50).map(j => j.wiki).join('|') });
-  for (const p of d.query.pages) qid[p.title] = p.pageprops?.wikibase_item;
-  await sleep(1000);
-}
-const idiomas = {};
-const qids = jogadores.map(j => qid[j.wiki]).filter(Boolean);
-for (let i = 0; i < qids.length; i += 50) {
-  const d = await api({ action:'wbgetentities', ids:qids.slice(i, i + 50).join('|'), props:'sitelinks' }, 'www.wikidata.org');
-  for (const [q, e] of Object.entries(d.entities)) idiomas[q] = Object.keys(e.sitelinks || {}).filter(s => /wiki$/.test(s) && !/commons|species|wikidata/.test(s)).length;
-  await sleep(1000);
-}
-for (const j of jogadores) j.idiomas = idiomas[qid[j.wiki]] || 0;
-
-// ranking final = média das posições em: idiomas, visitas en e visitas pt
-const tops = jogadores.filter(j => j.sec === 'top');
-for (const k of ['idiomas', 'vEn', 'vPt']) [...tops].sort((a, b) => b[k] - a[k]).forEach((j, i) => { j['r' + k] = i; });
-const porFama = [...tops].sort((a, b) => (a.ridiomas + a.rvEn + a.rvPt) - (b.ridiomas + b.rvEn + b.rvPt));
-const porNivel = Math.ceil(tops.length / NIVEIS.length);
-porFama.forEach((j, i) => { j.nivel = NIVEIS[Math.floor(i / porNivel)]; });
-for (const j of jogadores) if (j.sec !== 'top') j.nivel = 'lendas';
-
 const saida = jogadores.map(j => {
   const carreira = j.carreira.map(c => c.emp ? [c.id, c.a, c.b, 'emp'] : [c.id, c.a, c.b]);
-  const o = { id:slug(j.nome), nome:j.nome, sec:j.sec, nivel:j.nivel, pos:POS[j.pos], pais:j.pais, carreira };
-  if (j.ovr) o.ovr = j.ovr;
+  const o = { id:slug(j.nome), nome:j.nome, nivel:j.nivel, ovr:j.ovr, pos:POS[j.pos], pais:j.pais, carreira };
   if (APELIDOS[j.nome]) o.apelidos = APELIDOS[j.nome];
   return Object.assign(o, CORRECOES[o.id] || {});
 });
@@ -529,7 +488,7 @@ const nomeClube = id => clubes[id]?.n || id;
 const rel = [];
 for (const j of jogadores) {
   const o = saida.find(s => s.nome === j.nome);
-  rel.push(`${j.sec.padEnd(6)} ${j.nome} [${j.pais}] lista:${j.clubeLista || '-'} | wiki:${j.atualWiki}\n   ` +
+  rel.push(`${j.nivel.padEnd(8)} ${j.nome} (${j.ovr} ${j.pos}) [${j.pais}] clube atual na Wikipedia: ${j.atualWiki}\n   ` +
     o.carreira.map(c => `${nomeClube(c[0])}${c[3] === 'emp' ? '(emp)' : ''} ${c[1]}-${c[2] ?? 'hoje'}`).join(' → '));
 }
 fs.writeFileSync(path.join(CACHE, 'relatorio.txt'), rel.join('\n'));
@@ -539,5 +498,5 @@ console.log('Sem escudo:\n ' + (semEscudo.join('\n ') || 'nenhum'));
 console.log('Times B/reserva descartados:\n ' + [...descartados].join(' | '));
 fs.writeFileSync(path.join(CACHE, 'clubes.txt'), Object.entries(clubes).map(([id, c]) => `${id} = ${c.n}${c.img ? '' : '   [sem escudo]'}`).sort().join('\n'));
 console.log('Relatório completo em ' + path.join(CACHE, 'relatorio.txt'));
-console.log('\nNíveis (por fama na Wikipedia en + pt):');
-for (const n of NIVEIS) console.log(` ${n.padEnd(8)} ${porFama.filter(j => j.nivel === n).map(j => j.nome).join(', ')}`);
+console.log('\nJogadores por nível:');
+for (const n of NIVEIS) console.log(` ${n.padEnd(8)} ${saida.filter(j => j.nivel === n).length}`);

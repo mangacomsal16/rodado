@@ -89,7 +89,7 @@ nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .prog-txt b{color:var(--text)}
 .peek{display:flex;justify-content:center;gap:12px;margin:0 0 26px}
 .peek .fig,.peek .vazio{width:80px}
-.peek .fig .fn,.peek .fig .fp,.peek .fig .fo small{display:none}
+.peek .fig .fr,.peek .fig .fp,.peek .fig .fo small{display:none}
 .peek .fig .fo{font-size:19px}
 .peek .fig .fc{width:46%}
 .peek .fig .fnome{font-size:11px}
@@ -119,7 +119,6 @@ button.tile:hover{border-color:var(--lime);transform:translateY(-1px)}
 .fig{position:relative;aspect-ratio:3/4;border-radius:12px;border:1px solid rgba(255,255,255,.16);padding:8px 6px 9px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.55);color:#16130b;background:linear-gradient(160deg,#FBEAB0 0%,#E9C763 55%,#C99A2E 100%)}
 .fig::before{content:'';position:absolute;inset:4px;border:1px solid rgba(0,0,0,.18);border-radius:9px;pointer-events:none}
 .fig::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.38) 48%,transparent 60%);pointer-events:none}
-.fig .fn{position:absolute;top:7px;right:9px;font-size:9.5px;font-weight:800;letter-spacing:.04em;opacity:.7}
 .fig .fo{position:absolute;top:5px;left:9px;font-family:var(--display);font-weight:900;font-size:25px;line-height:1}
 .fig .fo small{display:block;font:800 8.5px var(--body);letter-spacing:.1em;margin-top:1px}
 .fig .fc{width:52%;aspect-ratio:1;margin:auto 0 7px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:9%}
@@ -127,18 +126,16 @@ button.tile:hover{border-color:var(--lime);transform:translateY(-1px)}
 .fig .fc span{font-family:var(--display);font-weight:900;font-size:22px;color:var(--on-lime)}
 .fig .fnome{font-family:var(--display);font-weight:900;font-size:14px;line-height:1;text-transform:uppercase;overflow-wrap:anywhere;max-width:100%}
 .fig .fp{font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:3px}
+.fig .fr{font-size:8.5px;font-weight:800;letter-spacing:.06em;opacity:.7;margin-top:1px;font-variant-numeric:tabular-nums}
 .fig.elite{background:linear-gradient(160deg,#3a3326 0%,#121110 65%);color:#F1D27A;border-color:#B8913A}
 .fig.elite::before{border-color:rgba(241,210,122,.35)}
 .fig.prata{background:linear-gradient(160deg,#FAFAF7 0%,#D3D5D0 55%,#9EA19B 100%)}
-.fig.lenda{background:linear-gradient(160deg,#FF6A45 0%,#C7361F 70%);color:#fff}
-.fig.lenda::before{border-color:rgba(255,255,255,.35)}
 .fig.idolo{background:linear-gradient(160deg,#F1E4C4 0%,#C9AF7E 70%);color:#3b2f1e}
 .fig.grande{width:210px;padding:14px 10px;border-radius:16px}
 .fig.grande .fo{font-size:44px;top:9px;left:13px}
 .fig.grande .fo small{font-size:11px}
-.fig.grande .fn{font-size:12px;top:12px;right:13px}
 .fig.grande .fnome{font-size:24px}
-.fig.grande .fp{font-size:11px}
+.fig.grande .fp,.fig.grande .fr{font-size:11px}
 .fig.grande .fc span{font-size:36px}
 .fig.cinza{filter:grayscale(1);opacity:.45}
 button.fig{cursor:pointer;transition:transform .15s}
@@ -154,6 +151,7 @@ button.fig:hover{transform:translateY(-4px) rotate(-1.5deg)}
 .album-head{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:16px 18px;align-items:center}
 .album-head h2{font-size:38px;margin-top:8px}
 .album-head .prog{grid-column:1/-1;margin:0;max-width:none}
+.aviso-teste{margin:16px 0 0;padding:10px 14px;border:1px dashed var(--amber);border-radius:12px;color:var(--amber);font-size:13px;font-weight:600}
 .secao{margin-top:34px}
 .secao-t{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
 .secao-t h3{font-size:32px}
@@ -287,6 +285,14 @@ dialog p b{color:var(--text)}
 
 footer{border-top:1px solid var(--line);width:100%;padding:20px 16px 28px;font-size:12px;color:var(--dim);text-align:center;line-height:1.6}
 footer p{margin:0 auto 8px;max-width:720px}
+.rodape-acoes{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 18px;margin-bottom:14px !important}
+.apoie{border:1px solid var(--lime);background:transparent;color:var(--lime);border-radius:999px;padding:6px 16px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:background .15s,color .15s}
+.apoie:hover{background:var(--lime);color:var(--on-lime)}
+.apoio-op{display:grid;gap:12px;margin-top:18px}
+a.cta{text-decoration:none}
+.pix{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:12px;padding:10px 12px}
+.pix code{flex:1;min-width:0;overflow-wrap:anywhere;font-size:13px;color:var(--text)}
+.pix .cta{padding:10px 14px;font-size:16px}
 
 @media (max-width:560px){
   .wm small{display:none}
@@ -314,9 +320,8 @@ footer p{margin:0 auto 8px;max-width:720px}
   .result.lado .fig.grande{width:128px;padding:9px 7px;border-radius:12px}
   .result.lado .fig.grande .fo{font-size:28px;top:7px;left:9px}
   .result.lado .fig.grande .fo small{font-size:9px}
-  .result.lado .fig.grande .fn{font-size:9.5px;top:8px;right:9px}
   .result.lado .fig.grande .fnome{font-size:15px}
-  .result.lado .fig.grande .fp{font-size:8.5px}
+  .result.lado .fig.grande .fp,.result.lado .fig.grande .fr{font-size:8.5px}
   .result.lado .stamp{font-size:21px;border-width:2px;padding:0 8px}
   .result.lado .big{font-size:36px}
   .result.lado .answer{font-size:14px;margin-bottom:8px}
@@ -425,13 +430,17 @@ footer p{margin:0 auto 8px;max-width:720px}
       <button class="cta" data-go="jogar">Abrir figurinha →</button>
       <div class="prog" id="aProg"></div>
     </div>
+    <p class="aviso-teste" id="aTeste" hidden>Versão de teste: todas as figurinhas aparecem liberadas. O contador mostra o seu progresso de verdade.</p>
     <div id="aSecoes"></div>
   </section>
 
 </main>
 
 <footer>
-  <p><button class="link" data-erro="">⚑ Encontrou algum erro? Avise a gente</button></p>
+  <p class="rodape-acoes">
+    <button class="link" data-erro="">⚑ Encontrou algum erro? Avise a gente</button>
+    <button class="apoie" data-apoio>♥ Apoie o Rodado</button>
+  </p>
   <p>Os nomes e referências a clubes de futebol são utilizados exclusivamente para fins de identificação dentro da simulação. Esta plataforma não é afiliada, patrocinada nem endossada pelos clubes mencionados, salvo indicação expressa em contrário.</p>
   <p id="fData">RODADO · projeto de fã sem fins comerciais · carreiras e escudos via Wikipedia</p>
 </footer>
@@ -443,7 +452,7 @@ footer p{margin:0 auto 8px;max-width:720px}
   <p>A carreira inteira do craque aparece de uma vez, com os escudos em ordem. Você tem <b>4 chutes</b>. A cada erro ganha uma pista: <b>nacionalidade</b>, <b>posição</b> e <b>iniciais</b>.</p>
   <p>Acertou? A figurinha é <b>colada no álbum</b>. Errou? Ela volta pro bolo e pode aparecer de novo. As figurinhas saem no sorteio — não dá pra escolher qual.</p>
   <h3>Níveis</h3>
-  <p><b>Fácil</b>, <b>Médio</b>, <b>Difícil</b> e <b>Insano</b> dividem os 120 jogadores mais bem avaliados do game pela fama (quanto mais conhecido, mais fácil). <b>Lendas</b> tem só aposentados e lendas vivas do futebol.</p>
+  <p><b>Fácil</b>, <b>Médio</b>, <b>Difícil</b> e <b>Insano</b> trazem jogadores em atividade, do mais conhecido ao mais obscuro. <b>Lendas</b> tem só quem já pendurou as chuteiras.</p>
   <h3>Desafio do dia</h3>
   <p>Mesmo craque pra todo mundo. Só o <b>primeiro clube</b> aparece; cada erro revela o próximo. São <b>6 chutes</b>. Acertando, a figurinha também vai pro álbum.</p>
   <p class="eyebrow" style="margin:16px 0 18px">EMP. = empréstimo</p>
@@ -453,6 +462,13 @@ footer p{margin:0 auto 8px;max-width:720px}
 <dialog id="verFig">
   <button class="dlg-x" aria-label="Fechar" onclick="this.closest('dialog').close()">×</button>
   <div class="ver" id="verBody"></div>
+</dialog>
+
+<dialog id="apoio">
+  <button class="dlg-x" aria-label="Fechar" onclick="this.closest('dialog').close()">×</button>
+  <h2>Apoie o Rodado</h2>
+  <p>O Rodado é um projeto independente, feito por fã e sem anúncio. Se você curte jogar, qualquer apoio ajuda a manter o jogo no ar e a colocar mais craques no álbum.</p>
+  <div id="apoioOpcoes"></div>
 </dialog>
 
 <dialog id="erro">
@@ -483,20 +499,27 @@ footer p{margin:0 auto 8px;max-width:720px}
    ========================================================= */
 const { clubes:CLUBES, jogadores:JOGADORES, atualizado } = window.TRAJ;
 
-// Níveis: os 120 do Top OVR divididos por fama (visitas na Wikipedia); Lendas = aposentados e lendas vivas
+// Níveis definidos à mão na lista do gerador; Lendas = só aposentados
 const NIVEIS = [
   ['facil',   'Fácil',   'Os craques que todo mundo conhece',             '#4ADE80'],
-  ['medio',   'Médio',   'Titulares de seleção e de clube grande',        '#FACC15'],
+  ['medio',   'Médio',   'Craques consagrados e titulares de clube grande', '#FACC15'],
   ['dificil', 'Difícil', 'Pra quem acompanha o futebol europeu',          '#FB923C'],
   ['insano',  'Insano',  'Só quem vê jogo de madrugada acerta',           '#FF5A4E'],
-  ['lendas',  'Lendas',  'Aposentados e lendas vivas do futebol',         '#C9A7FF'],
+  ['lendas',  'Lendas',  'Só aposentados: quem já pendurou as chuteiras', '#C9A7FF'],
 ];
 const NIVEL = Object.fromEntries(NIVEIS.map(([k, nome, desc, cor], i) => [k, { k, nome, desc, cor, i }]));
-for (const p of JOGADORES) if (!NIVEL[p.nivel]) p.nivel = p.sec === 'top' ? 'medio' : 'lendas';
+for (const p of JOGADORES) if (!NIVEL[p.nivel]) p.nivel = 'medio';
 // numeração do álbum segue a ordem dos níveis (dentro de cada nível, por OVR)
 JOGADORES.sort((a, b) => NIVEL[a.nivel].i - NIVEL[b.nivel].i);
 JOGADORES.forEach((p, i) => { p.num = i + 1; });
-const SIGLA = { 'Atacante':'ATA','Ponta-esquerda':'PE','Ponta-direita':'PD','Meia':'MEI','Meio-campo':'MC','Volante':'VOL',
+// ranking na seleção (aparece na carta embaixo do país): 1/30 = maior OVR entre os 30 jogadores daquele país
+const porPais = {};
+for (const p of JOGADORES) (porPais[p.pais] ||= []).push(p);
+for (const ps of Object.values(porPais)) {
+  ps.sort((a, b) => b.ovr - a.ovr || a.num - b.num);
+  ps.forEach((p, i) => { p.rankPais = i + 1; p.totalPais = ps.length; });
+}
+const SIGLA = { 'Centroavante':'CA','Atacante':'ATA','Ponta-esquerda':'PE','Ponta-direita':'PD','Meia':'MEI','Meio-campo':'MC','Volante':'VOL',
   'Zagueiro':'ZAG','Lateral-esquerdo':'LE','Lateral-direito':'LD','Goleiro':'GOL','Meia-esquerda':'ME','Meia-direita':'MD' };
 
 // Nomes extras no autocompletar, pra resposta não ficar óbvia pela lista
@@ -507,7 +530,10 @@ const DECOYS = `Pelé|Romário|Rivaldo|Roberto Carlos|Cafu|Adriano Imperador|Rob
    ========================================================= */
 const $ = s => document.querySelector(s);
 const byId = Object.fromEntries(JOGADORES.map(p => [p.id, p]));
-const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+// letras que não existem no teclado brasileiro e não somem com o NFD: Ødegaard → odegaard, Yıldız → yildiz
+const SIMPLES = { ø:'o', Ø:'o', ı:'i', İ:'i', æ:'ae', Æ:'ae', œ:'oe', Œ:'oe', ß:'ss', đ:'d', Đ:'d', ł:'l', Ł:'l', ð:'d', þ:'th' };
+const norm = s => s.replace(/[øØıİæÆœŒßđĐłŁðþ]/g, c => SIMPLES[c]).normalize('NFD').replace(/[̀-ͯ]/g,'')
+  .toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const store = {
   get(k){ try{ return JSON.parse(localStorage.getItem('trj2:'+k)); }catch{ return null; } },
@@ -520,7 +546,8 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 const iniciais = nome => nome.split(/\s+/).map(w => w[0] + '·'.repeat(Math.max(0, w.length - 1))).join(' ');
 // clube atual = passagem em aberto; se aposentado, a que terminou por último (empréstimos vêm listados depois do clube dono)
 const clubeAtual = p => (p.carreira.find(c => c[2] === null) || p.carreira.reduce((a, c) => c[2] >= a[2] ? c : a))[0];
-const tier = p => p.sec === 'lenda' ? 'lenda' : p.sec === 'eterno' ? 'idolo' : p.ovr >= 89 ? 'elite' : p.ovr >= 86 ? 'ouro' : 'prata';
+// carta: lendas = sépia; OVR 90+ = preta; 84–89 = ouro; até 83 = prata
+const tier = p => p.nivel === 'lendas' ? 'idolo' : p.ovr >= 90 ? 'elite' : p.ovr >= 84 ? 'ouro' : 'prata';
 
 // escudo sempre num disco branco: muitos escudos são escuros e sumiriam no fundo preto
 function crestImg(id){
@@ -532,11 +559,12 @@ function crestImg(id){
 
 function figHTML(p, { big = false, tag = 'div', extra = '' } = {}){
   const c = clube(clubeAtual(p));
-  const topo = p.sec === 'top' ? `${p.ovr}<small>${SIGLA[p.pos] || ''}</small>` : `★<small>${p.sec === 'lenda' ? 'LENDA' : 'ÍDOLO'}</small>`;
+  const topo = `${p.ovr}<small>${SIGLA[p.pos] || ''}</small>`;
   return `<${tag} class="fig ${tier(p)}${big ? ' grande' : ''} ${extra}" ${tag === 'button' ? `data-ver="${p.id}" aria-label="Figurinha ${p.num}: ${esc(p.nome)}"` : ''}>
-    <span class="fo">${topo}</span><span class="fn">#${pad(p.num)}</span>
+    <span class="fo">${topo}</span>
     <span class="fc">${c.img ? `<img src="${c.img}" alt="" loading="lazy">` : `<span>${esc(c.n[0])}</span>`}</span>
     <span class="fnome">${esc(p.nome)}</span><span class="fp">${esc(p.pais || '')}</span>
+    <span class="fr" title="${p.rankPais}º maior OVR entre os ${p.totalPais} de ${esc(p.pais || '')}">${p.rankPais}/${p.totalPais}</span>
   </${tag}>`;
 }
 
@@ -605,6 +633,10 @@ const GOALS = ['Golaço!','Gol de placa!','Bola na rede!','Gol!','No rebote!','N
 
 let G = null;                        // partida atual
 let colecao = store.get('album') || {}; // { id: { t, via } }
+// Versão de teste: o álbum mostra todas as figurinhas liberadas (o jogo continua sorteando normalmente).
+// Troque para false antes de mandar pros amigos.
+const MODO_TESTE = true;
+
 let destaque = null;                 // figurinha recém-colada, pra piscar no álbum
 let ultimaPerdida = null;
 let nivel = NIVEL[store.get('nivel')] ? store.get('nivel') : 'facil';
@@ -942,6 +974,7 @@ function renderHome(){
 
 function renderAlbum(){
   const tem = coladas(), total = JOGADORES.length;
+  $('#aTeste').hidden = !MODO_TESTE;
   $('#aTitle').textContent = `${tem} / ${total} figurinhas`;
   $('#aProg').innerHTML = progHTML(tem, total);
   $('#aSecoes').innerHTML = NIVEIS.map(([k, nome, desc, cor]) => {
@@ -951,7 +984,7 @@ function renderAlbum(){
         <div><h3><i class="dot"></i>${nome}</h3><small>${desc}</small></div>
         <div class="secao-r"><span class="ct">${n}/${ps.length}</span>${n < ps.length ? `<button class="link" data-nivel="${k}" data-jogar>Jogar esse nível →</button>` : ''}</div>
       </div>
-      <div class="figs">${ps.map(p => colecao[p.id]
+      <div class="figs">${ps.map(p => colecao[p.id] || MODO_TESTE
         ? figHTML(p, { tag:'button', extra:p.id === destaque ? 'pulse' : '' })
         : `<div class="vazio" aria-label="Figurinha ${p.num}, ainda não colada"><span class="vn">${pad(p.num)}</span><span class="vq">?</span></div>`).join('')}</div>
     </section>`;
@@ -978,7 +1011,31 @@ function verFigurinha(id){
 const CONTATO_ERROS = '';
 let erroDe = null;
 
-const linkErro = id => `<button class="link erro-link" data-erro="${id}">⚑ Encontrou algum erro nessa carreira?</button>`;
+/* ---------- apoio ----------
+   Preencha pra ativar as formas de apoio. Vazio = a janela pede pra compartilhar o jogo. */
+const APOIO = {
+  pix: 'otaviofdeborba@gmail.com', // chave Pix (e-mail, telefone, CPF/CNPJ ou chave aleatória)
+  link: '',           // link de apoio: apoia.se, Ko-fi, Livepix, Buy Me a Coffee…
+  linkNome: 'Apoiar', // texto do botão do link
+};
+
+function abrirApoio(){
+  const ops = [];
+  if (APOIO.pix) ops.push(`<div><div class="eyebrow" style="margin-bottom:6px">Pix</div>
+    <div class="pix"><code id="pixChave">${esc(APOIO.pix)}</code><button class="cta" id="copiarPix">Copiar</button></div></div>`);
+  if (APOIO.link) ops.push(`<a class="cta" href="${esc(APOIO.link)}" target="_blank" rel="noopener">${esc(APOIO.linkNome)} →</a>`);
+  if (!ops.length) ops.push(`<p>As formas de apoio chegam em breve. Por enquanto, a maior ajuda é mandar o jogo pros amigos!</p>
+    <button class="cta" id="compartilharJogo">Compartilhar o Rodado →</button>`);
+  $('#apoioOpcoes').innerHTML = `<div class="apoio-op">${ops.join('')}</div>`;
+  $('#apoio').showModal();
+}
+
+async function copiar(texto, aviso){
+  try { await navigator.clipboard.writeText(texto); toast(aviso); }
+  catch { prompt('Copie:', texto); }
+}
+
+const linkErro = id =>`<button class="link erro-link" data-erro="${id}">⚑ Encontrou algum erro nessa carreira?</button>`;
 
 function abrirErro(id){
   erroDe = byId[id] || null;
@@ -1054,6 +1111,13 @@ document.addEventListener('click', async e => {
   if (ver) return verFigurinha(ver.dataset.ver);
   const erro = t.closest('[data-erro]');
   if (erro) return abrirErro(erro.dataset.erro);
+  if (t.closest('[data-apoio]')) return abrirApoio();
+  if (t.closest('#copiarPix')) return copiar(APOIO.pix, 'Chave Pix copiada! Valeu 💚');
+  if (t.closest('#compartilharJogo')) {
+    const url = location.origin + location.pathname;
+    if (navigator.share) return navigator.share({ title:'Rodado', text:'Adivinhe o craque pela carreira ⚽', url }).catch(() => {});
+    return copiar(url, 'Link do jogo copiado!');
+  }
   if (t.closest('#nextBtn')) {
     newAlbumRound();
     if (G) renderGame(); else renderCompleto();
