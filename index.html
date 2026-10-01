@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rodado — adivinhe o craque pela carreira</title>
+<meta name="description" content="Adivinhe o jogador pelos escudos dos clubes por onde ele rodou e complete o álbum de figurinhas.">
+<meta name="theme-color" content="#09090B">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090B; --surface:#111115; --surface-2:#18181D; --surface-3:#212128;
+  --line:#25252C; --line-2:#34343C;
+  --text:#FAFAFA; --muted:#A1A1AA; --dim:#6D6D78;
+  --lime:#D4FF3A; --lime-hi:#E4FF7A; --on-lime:#0B0B0D;
+  --amber:#F5B83D; --lose:#FF5A4E;
+  --display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+::selection{background:var(--lime);color:var(--on-lime)}
+button,select,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none !important}
+h1,h2,h3{font-family:var(--display);font-weight:900;text-transform:uppercase;letter-spacing:.01em;margin:0;line-height:.95}
+.wrap{width:100%;max-width:780px;margin:0 auto;padding:28px 16px 56px;flex:1}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+/* etiqueta inclinada, estilo grafismo de transmissão */
+.tv{display:inline-block;white-space:nowrap;transform:skewX(-12deg);background:var(--lime);color:var(--on-lime);padding:3px 11px;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.tv > span{display:inline-block;transform:skewX(12deg)}
+.tv.dark{background:var(--surface-3);color:var(--text)}
+.tv.red{background:var(--lose);color:#fff}
+:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+
+/* ---------- topo ---------- */
+.top{position:sticky;top:0;z-index:30;background:rgba(9,9,11,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1040px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;text-align:left}
+.brand img{width:40px;height:40px;display:block}
+.wm b{display:block;font-family:var(--display);font-weight:900;font-size:27px;line-height:.9;letter-spacing:.03em}
+.wm small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pill{border:1px solid var(--line-2);background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;transition:color .15s,border-color .15s}
+.pill:hover{color:var(--text);border-color:var(--dim)}
+.pill[aria-current="page"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.pill .badge{display:inline-block;min-width:18px;margin-left:6px;padding:0 5px;border-radius:999px;background:var(--lime);color:var(--on-lime);font-size:10px;line-height:16px;text-align:center}
+
+/* ---------- botões ---------- */
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--lime);color:var(--on-lime);border:0;border-radius:12px;padding:14px 26px;font-family:var(--display);font-weight:900;font-size:21px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;transition:transform .12s,box-shadow .12s,background .12s}
+.cta:hover{background:var(--lime-hi);box-shadow:0 0 0 4px rgba(212,255,58,.16),0 10px 30px rgba(212,255,58,.15);transform:translateY(-1px)}
+.cta:active{transform:translateY(1px)}
+.cta.ghost{background:transparent;color:var(--text);box-shadow:inset 0 0 0 1px var(--line-2)}
+.cta.ghost:hover{color:var(--lime);box-shadow:inset 0 0 0 1px var(--lime)}
+.link{background:none;border:0;padding:4px 0;font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-2);color:var(--muted)}
+.link:hover{color:var(--lime);text-decoration-color:var(--lime)}
+.erro-link{margin-top:18px;display:inline-flex;gap:6px;align-items:center}
+
+/* ---------- início ---------- */
+.hero{position:relative;overflow:hidden;isolation:isolate;background:radial-gradient(110% 80% at 100% 0%,rgba(212,255,58,.13),transparent 55%),var(--surface);border:1px solid var(--line);border-radius:22px;padding:34px 24px 28px;text-align:center}
+/* marcações de campo: círculo central e linha do meio */
+.hero::before{content:'';position:absolute;z-index:-1;width:360px;height:360px;left:50%;top:52%;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.05);border-radius:50%}
+.hero::after{content:'';position:absolute;z-index:-1;left:0;right:0;top:52%;height:1px;background:rgba(255,255,255,.05)}
+.hero h1{font-size:clamp(48px,10vw,78px);margin:16px 0 12px}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.hero p{max-width:440px;margin:0 auto 22px;color:var(--muted)}
+.hero .row{display:flex;flex-direction:column;align-items:center;gap:12px}
+/* seletor de nível */
+.niveis{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:600px;margin:0 auto 10px}
+.nivel{flex:1 1 78px;max-width:116px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 8px 9px;border-radius:14px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--muted);transition:border-color .15s,background .15s,transform .12s}
+.nivel i{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c)}
+.nivel b{font-family:var(--display);font-weight:900;font-size:21px;line-height:1;text-transform:uppercase;color:var(--text);margin-top:3px}
+.nivel small{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.nivel:hover{border-color:var(--c);transform:translateY(-1px)}
+.nivel[aria-checked="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 13%,var(--surface-2));box-shadow:inset 0 0 0 1px var(--c)}
+.nivel.feito small{color:var(--c)}
+.nivel-desc{font-size:13px;color:var(--muted);margin:0 0 24px;min-height:1.5em}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 12px var(--c);margin:0 10px 4px 0;vertical-align:middle}
+.secao-r{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.secao-r .link{font-size:12px}
+.prog{width:100%;max-width:380px;margin:0 auto 24px}
+.prog-bar{height:10px;border-radius:999px;background:var(--surface-3);overflow:hidden}
+.prog-bar i{display:block;height:100%;border-radius:999px;background:repeating-linear-gradient(-45deg,var(--lime) 0 8px,#C2EC24 8px 16px);transition:width .6s}
+.prog-txt{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.prog-txt b{color:var(--text)}
+.peek{display:flex;justify-content:center;gap:12px;margin:0 0 26px}
+.peek .fig,.peek .vazio{width:80px}
+.peek .fig .fn,.peek .fig .fp,.peek .fig .fo small{display:none}
+.peek .fig .fo{font-size:19px}
+.peek .fig .fc{width:46%}
+.peek .fig .fnome{font-size:11px}
+.peek > :nth-child(odd){transform:rotate(-5deg)}
+.peek > :nth-child(even){transform:rotate(4deg) translateY(-4px)}
+.timer{display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:7px 16px;font-size:11px;letter-spacing:.12em;font-weight:700;text-transform:uppercase;color:var(--muted)}
+.timer b{font-family:var(--display);font-size:17px;color:var(--lime);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:16px}
+.tile{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 18px;transition:border-color .15s,transform .12s}
+button.tile:hover{border-color:var(--lime);transform:translateY(-1px)}
+.tile .txt{flex:1;min-width:0}
+.tile b{display:block;font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;line-height:1;margin-top:6px}
+.tile small{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.tile small .cd{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
+.tile .status{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;background:var(--surface-3);white-space:nowrap}
+.tile .status.ok{background:var(--lime);color:var(--on-lime)}
+.tile .status.x{background:var(--lose);color:#fff}
+.mystery{display:flex;flex:none}
+.mystery span{width:38px;height:38px;border-radius:50%;border:1px dashed var(--line-2);background:var(--surface-2);margin-left:-12px;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:17px;color:var(--dim)}
+.mystery span:first-child{margin-left:0;border:0;background:#fff;color:var(--on-lime)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.stats div{background:var(--surface-2);border-radius:12px;padding:10px 4px}
+.stats b{display:block;font-family:var(--display);font-weight:900;font-size:30px;line-height:1.05}
+.stats span{font-size:10px;letter-spacing:.12em;font-weight:700;text-transform:uppercase;color:var(--dim)}
+
+/* ---------- figurinha ---------- */
+.fig{position:relative;aspect-ratio:3/4;border-radius:12px;border:1px solid rgba(255,255,255,.16);padding:8px 6px 9px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;overflow:hidden;box-shadow:0 10px 24px rgba(0,0,0,.55);color:#16130b;background:linear-gradient(160deg,#FBEAB0 0%,#E9C763 55%,#C99A2E 100%)}
+.fig::before{content:'';position:absolute;inset:4px;border:1px solid rgba(0,0,0,.18);border-radius:9px;pointer-events:none}
+.fig::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.38) 48%,transparent 60%);pointer-events:none}
+.fig .fn{position:absolute;top:7px;right:9px;font-size:9.5px;font-weight:800;letter-spacing:.04em;opacity:.7}
+.fig .fo{position:absolute;top:5px;left:9px;font-family:var(--display);font-weight:900;font-size:25px;line-height:1}
+.fig .fo small{display:block;font:800 8.5px var(--body);letter-spacing:.1em;margin-top:1px}
+.fig .fc{width:52%;aspect-ratio:1;margin:auto 0 7px;background:#fff;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;overflow:hidden;padding:9%}
+.fig .fc img{width:100%;height:100%;object-fit:contain}
+.fig .fc span{font-family:var(--display);font-weight:900;font-size:22px;color:var(--on-lime)}
+.fig .fnome{font-family:var(--display);font-weight:900;font-size:14px;line-height:1;text-transform:uppercase;overflow-wrap:anywhere;max-width:100%}
+.fig .fp{font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:3px}
+.fig.elite{background:linear-gradient(160deg,#3a3326 0%,#121110 65%);color:#F1D27A;border-color:#B8913A}
+.fig.elite::before{border-color:rgba(241,210,122,.35)}
+.fig.prata{background:linear-gradient(160deg,#FAFAF7 0%,#D3D5D0 55%,#9EA19B 100%)}
+.fig.lenda{background:linear-gradient(160deg,#FF6A45 0%,#C7361F 70%);color:#fff}
+.fig.lenda::before{border-color:rgba(255,255,255,.35)}
+.fig.idolo{background:linear-gradient(160deg,#F1E4C4 0%,#C9AF7E 70%);color:#3b2f1e}
+.fig.grande{width:210px;padding:14px 10px;border-radius:16px}
+.fig.grande .fo{font-size:44px;top:9px;left:13px}
+.fig.grande .fo small{font-size:11px}
+.fig.grande .fn{font-size:12px;top:12px;right:13px}
+.fig.grande .fnome{font-size:24px}
+.fig.grande .fp{font-size:11px}
+.fig.grande .fc span{font-size:36px}
+.fig.cinza{filter:grayscale(1);opacity:.45}
+button.fig{cursor:pointer;transition:transform .15s}
+button.fig:hover{transform:translateY(-4px) rotate(-1.5deg)}
+.vazio{aspect-ratio:3/4;border:1px dashed var(--line-2);border-radius:12px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);padding:0;transition:border-color .15s,color .15s}
+.vazio .vn{font-family:var(--display);font-weight:900;font-size:24px;line-height:1}
+.vazio .vq{font-family:var(--display);font-weight:900;font-size:30px;color:var(--line-2);line-height:1}
+.vazio small{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.pulse{animation:pulse 1.2s ease 2}
+@keyframes pulse{50%{transform:scale(1.08);box-shadow:0 0 0 5px var(--lime),0 0 40px rgba(212,255,58,.5)}}
+
+/* ---------- álbum ---------- */
+.album-head{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px;display:grid;grid-template-columns:1fr auto;gap:16px 18px;align-items:center}
+.album-head h2{font-size:38px;margin-top:8px}
+.album-head .prog{grid-column:1/-1;margin:0;max-width:none}
+.secao{margin-top:34px}
+.secao-t{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+.secao-t h3{font-size:32px}
+.secao-t small{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.secao-t .ct{font-family:var(--display);font-weight:900;font-size:22px;color:var(--c,var(--lime));white-space:nowrap}
+.figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:16px 12px}
+
+/* ---------- jogo ---------- */
+.gamebar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.gamebar .mid{flex:1;text-align:center}
+.balls{display:flex;gap:6px}
+.ball{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--line-2);background:transparent}
+.ball.used{background:var(--lose);border-color:var(--lose)}
+.ball.hit{background:var(--lime);border-color:var(--lime);box-shadow:0 0 10px rgba(212,255,58,.6)}
+.board{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px 18px 18px}
+.board-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.board h2{font-size:clamp(30px,6vw,40px)}
+.meta{font-size:13px;font-weight:600;color:var(--muted)}
+.meta b{color:var(--lime);font-family:var(--display);font-size:18px}
+.slots{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:12px}
+.slot{position:relative;min-height:156px;border:1px dashed var(--line-2);border-radius:14px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 8px 12px;text-align:center}
+.slot .num{position:absolute;top:8px;left:10px;font-family:var(--display);font-weight:800;font-size:14px;color:var(--dim);letter-spacing:.04em}
+.slot .q{font-family:var(--display);font-weight:900;font-size:48px;color:var(--surface-3);line-height:1}
+.slot.on{border:1px solid var(--line);background:var(--surface-2)}
+.slot.on .num{color:var(--lime)}
+.cw{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:9px;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.cw img{width:100%;height:100%;object-fit:contain;display:block}
+.cw .fallback{font-family:var(--display);font-weight:900;font-size:26px;color:var(--on-lime)}
+.slot .club{font-family:var(--display);font-weight:800;font-size:17px;line-height:1;text-transform:uppercase;letter-spacing:.02em;overflow-wrap:anywhere}
+.slot .yrs{font-size:12px;font-weight:600;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
+.tag{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;letter-spacing:.1em;padding:2px 7px;border-radius:999px;background:var(--amber);color:var(--on-lime)}
+.new{animation:stick .5s cubic-bezier(.2,1.4,.4,1) both;animation-delay:calc(var(--d,0) * 70ms)}
+@keyframes stick{0%{transform:scale(.6) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+
+.extras{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.extra{border:1px solid var(--line-2);border-radius:12px;padding:9px 12px;background:var(--surface-2);min-width:0}
+.extra .k{display:block;font-size:10px;letter-spacing:.12em;font-weight:800;text-transform:uppercase;color:var(--lime)}
+.extra .v{display:block;font-family:var(--display);font-weight:900;font-size:21px;text-transform:uppercase;line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
+.extra .v.ini{letter-spacing:.1em}
+.extra.locked{border-style:dashed;background:transparent}
+.extra.locked .k{color:var(--dim)}
+.extra.locked .v{font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--dim);text-transform:none;letter-spacing:0;padding-top:2px}
+
+.guess{display:flex;gap:10px;margin-top:20px}
+.field{position:relative;flex:1;min-width:0}
+.field input{width:100%;height:56px;border:1px solid var(--line-2);border-radius:12px;background:var(--surface-2);padding:0 18px;font-size:16px;font-weight:600;color:var(--text)}
+.field input::placeholder{color:var(--dim);font-weight:500}
+.field input:focus{outline:none;border-color:var(--lime);box-shadow:0 0 0 4px rgba(212,255,58,.12)}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;list-style:none;margin:0;padding:6px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.6);max-height:290px;overflow:auto}
+.sugg li{padding:10px 12px;border-radius:8px;font-weight:600;cursor:pointer}
+.sugg li:hover{background:var(--surface-3)}
+.sugg li[aria-selected="true"]{background:var(--lime);color:var(--on-lime)}
+.sugg li mark{background:none;color:inherit;text-decoration:underline;text-decoration-color:var(--lime);text-decoration-thickness:2px;text-underline-offset:3px}
+.sugg li[aria-selected="true"] mark{text-decoration-color:currentColor}
+.sugg li.dup{opacity:.35;pointer-events:none}
+#v-game{padding-bottom:140px}
+.subrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;min-height:26px}
+.msg{font-size:13px;font-weight:700;color:var(--lose)}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.history{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}
+.history li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-weight:600}
+.history .n{font-family:var(--display);font-weight:900;font-size:17px;width:18px;color:var(--dim)}
+.history .who{flex:1}
+.history .ic{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.history li.bad{box-shadow:inset 3px 0 0 var(--lose)}
+.history li.bad .ic{color:var(--lose)}
+.history li.skip{border-style:dashed;color:var(--dim)}
+.history li.good{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.history li.good .n{color:rgba(0,0,0,.5)}
+
+.result{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:26px 20px;text-align:center;animation:stick .5s cubic-bezier(.2,1.4,.4,1) both}
+.result.won{border-color:rgba(212,255,58,.5);box-shadow:0 0 60px rgba(212,255,58,.08)}
+.result .big{font-size:clamp(46px,10vw,74px);margin:12px 0 6px}
+.result.won .big{color:var(--lime)}
+.result.lost .big{color:var(--lose)}
+.answer{font-size:17px;margin:0 0 14px;color:var(--muted)}
+.answer b{font-family:var(--display);font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:.02em;color:var(--text)}
+.squares{font-size:22px;letter-spacing:4px;margin:0 0 18px}
+.btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stage{position:relative;display:flex;justify-content:center;margin:14px 0 24px}
+.stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-14deg);font-family:var(--display);font-weight:900;font-size:36px;letter-spacing:.08em;color:var(--lime);border:3px solid var(--lime);border-radius:8px;padding:0 14px;background:rgba(9,9,11,.85);animation:stamp .45s .35s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+.stamp.x{color:var(--lose);border-color:var(--lose)}
+@keyframes stamp{0%{transform:translate(-50%,-50%) rotate(-14deg) scale(2.4);opacity:0}100%{transform:translate(-50%,-50%) rotate(-14deg) scale(1);opacity:1}}
+/* resultado do álbum: figurinha à esquerda, menu à direita */
+.result.lado{display:grid;grid-template-columns:auto minmax(0,1fr);gap:30px;align-items:center;text-align:left;padding:26px}
+.result.lado .stage{margin:0}
+.result.lado .big{margin:8px 0 6px}
+.result.lado .note{margin:0 0 20px}
+.result.lado .btns{flex-direction:column;align-items:stretch}
+.result.lado .erro-link{margin-top:14px}
+.note{font-size:14px;color:var(--muted);margin:-6px 0 20px}
+.note b{color:var(--text)}
+.dist{margin:24px auto 0;max-width:340px;text-align:left}
+.dist h3{font-size:18px;margin:0 0 10px;text-align:center}
+.bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px;font-weight:800}
+.bar span:first-child{width:12px;text-align:right;color:var(--dim)}
+.bar i{display:block;height:22px;min-width:26px;background:var(--surface-3);border-radius:6px;color:var(--text);font-style:normal;text-align:right;padding:0 8px;line-height:22px}
+.bar i.me{background:var(--lime);color:var(--on-lime)}
+.result .stats{margin-top:22px}
+.result .timer{margin-top:20px}
+
+/* ---------- diálogos ---------- */
+dialog{border:1px solid var(--line-2);border-radius:20px;padding:26px 22px;max-width:480px;width:calc(100% - 32px);background:var(--surface);color:var(--text);box-shadow:0 30px 80px rgba(0,0,0,.7)}
+dialog::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+dialog h2{font-size:36px;margin-bottom:14px}
+dialog h3{font-size:20px;margin:18px 0 6px;color:var(--lime)}
+dialog p{margin:0 0 10px;color:var(--muted)}
+dialog p b{color:var(--text)}
+.dlg-x{position:absolute;top:12px;right:14px;border:0;background:none;color:var(--muted);font-size:26px;line-height:1;padding:6px}
+.dlg-x:hover{color:var(--text)}
+.ver{display:flex;flex-direction:column;align-items:center;text-align:center}
+.ver .fig{margin-bottom:18px}
+.mini{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.mini li{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:5px 11px 5px 5px;text-align:left}
+.mini .cw{width:30px;height:30px;padding:4px;margin:0;box-shadow:none}
+.mini .cw .fallback{font-size:14px}
+.mini b{display:block;font-family:var(--display);font-weight:900;font-size:15px;text-transform:uppercase;line-height:1}
+.mini small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
+.form label{display:block;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.form select,.form textarea{width:100%;background:var(--surface-2);border:1px solid var(--line-2);border-radius:10px;padding:11px 12px;font-size:15px;color:var(--text);text-transform:none;letter-spacing:0;font-weight:500}
+.form textarea{resize:vertical;min-height:110px}
+.form select:focus,.form textarea:focus{outline:none;border-color:var(--lime)}
+.form .btns{justify-content:flex-start;margin-top:18px}
+.hint{font-size:12.5px;color:var(--dim);margin:12px 0 0}
+.sobre{display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;color:var(--muted)}
+.sobre b{color:var(--text)}
+.sobre .cw{width:34px;height:34px;padding:4px;margin:0;box-shadow:none;flex:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--lime);color:var(--on-lime);padding:11px 20px;border-radius:999px;font-weight:800;font-size:14px;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+
+footer{border-top:1px solid var(--line);width:100%;padding:20px 16px 28px;font-size:12px;color:var(--dim);text-align:center;line-height:1.6}
+footer p{margin:0 auto 8px;max-width:720px}
+
+@media (max-width:560px){
+  .wm small{display:none}
+  .wm b{font-size:23px}
+  .brand img{width:34px;height:34px}
+  .pill{padding:6px 10px;font-size:11px}
+  .board{padding:18px 12px 14px}
+  .slots{gap:8px;grid-template-columns:repeat(3,1fr)}
+  .slot{min-height:140px;padding:22px 4px 10px}
+  .cw{width:56px;height:56px;padding:7px}
+  .slot .club{font-size:15px}
+  .extras{gap:6px}
+  .extra{padding:8px}
+  .extra .k{font-size:9px;letter-spacing:.06em}
+  .extra .v{font-size:17px}
+  .guess{flex-direction:column}
+  .guess .cta{width:100%}
+  .stats b{font-size:24px}
+  .figs{grid-template-columns:repeat(3,1fr);gap:12px 8px}
+  .fig .fnome{font-size:12px}
+  .album-head{grid-template-columns:1fr}
+  .album-head .cta{width:100%}
+  .peek .fig,.peek .vazio{width:66px}
+  .result.lado{gap:14px;padding:18px 14px}
+  .result.lado .fig.grande{width:128px;padding:9px 7px;border-radius:12px}
+  .result.lado .fig.grande .fo{font-size:28px;top:7px;left:9px}
+  .result.lado .fig.grande .fo small{font-size:9px}
+  .result.lado .fig.grande .fn{font-size:9.5px;top:8px;right:9px}
+  .result.lado .fig.grande .fnome{font-size:15px}
+  .result.lado .fig.grande .fp{font-size:8.5px}
+  .result.lado .stamp{font-size:21px;border-width:2px;padding:0 8px}
+  .result.lado .big{font-size:36px}
+  .result.lado .answer{font-size:14px;margin-bottom:8px}
+  .result.lado .answer b{font-size:19px}
+  .result.lado .note{font-size:13px;margin-bottom:14px}
+  .result.lado .cta{font-size:17px;padding:12px}
+  .so-largo{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .new,.result,.shake,.stamp,.pulse{animation:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <button class="brand" data-go="home" aria-label="Rodado — início">
+      <img src="favicon.svg" alt="">
+      <span class="wm"><b>RODADO</b><small>Adivinhe o craque pela carreira</small></span>
+    </button>
+    <nav>
+      <button class="pill" data-go="album">Álbum<span class="badge" id="navCount">0</span></button>
+      <button class="pill" data-go="desafio">Desafio</button>
+      <button class="pill" id="helpBtn" aria-label="Como jogar">?</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- INÍCIO -->
+  <section id="v-home">
+    <div class="hero">
+      <span class="tv"><span>Modo principal · Álbum</span></span>
+      <h1>Complete<br>o <em>álbum</em></h1>
+      <p>A carreira inteira do craque aparece de uma vez. Descobriu quem é? A figurinha vai pro álbum.</p>
+      <div class="niveis" id="hNiveis" role="radiogroup" aria-label="Escolha o nível"></div>
+      <p class="nivel-desc" id="hNivelDesc"></p>
+      <div class="peek" id="hPeek" aria-hidden="true"></div>
+      <div class="prog" id="hProg"></div>
+      <div class="row">
+        <button class="cta" data-go="jogar" id="hCta">Abrir figurinha →</button>
+        <button class="link" data-go="album">Ver meu álbum</button>
+      </div>
+    </div>
+
+    <div class="tiles">
+      <button class="tile" data-go="desafio">
+        <span class="mystery" aria-hidden="true"><span>1</span><span>?</span><span>?</span></span>
+        <span class="txt">
+          <span class="tv dark"><span id="hDate">Desafio do dia</span></span>
+          <b>Um escudo por vez</b>
+          <small><span id="hDia"></span> · 6 chutes · novo em <span class="cd">--:--:--</span></small>
+        </span>
+        <span class="status" id="hStatus">Jogar</span>
+      </button>
+      <div class="tile" style="display:block">
+        <div class="eyebrow" style="margin-bottom:10px">Minhas estatísticas · desafio do dia</div>
+        <div class="stats" id="hStats"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOGO -->
+  <section id="v-game" hidden>
+    <div class="gamebar">
+      <button class="pill" data-go="home">← Início</button>
+      <div class="mid eyebrow" id="gLabel"></div>
+      <div class="balls" id="balls" role="img"></div>
+    </div>
+
+    <div class="board" id="board">
+      <div class="board-head">
+        <h2>De quem é essa carreira?</h2>
+        <div class="meta" id="gMeta"></div>
+      </div>
+      <ol class="slots" id="slots"></ol>
+      <div class="extras" id="extras"></div>
+    </div>
+
+    <form class="guess" id="gForm" autocomplete="off">
+      <div class="field">
+        <input id="gInput" type="text" placeholder="Digite o nome do jogador…" role="combobox"
+               aria-label="Nome do jogador" aria-expanded="false" aria-controls="sugg" aria-autocomplete="list" spellcheck="false">
+        <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+      </div>
+      <button class="cta" type="submit">Chutar →</button>
+    </form>
+    <div class="subrow" id="gSub">
+      <button type="button" class="link" id="skipBtn"></button>
+      <span class="msg" id="gMsg" aria-live="polite"></span>
+    </div>
+
+    <ol class="history" id="history"></ol>
+    <div id="result" hidden></div>
+  </section>
+
+  <!-- ÁLBUM -->
+  <section id="v-album" hidden>
+    <div class="album-head">
+      <div>
+        <span class="tv"><span>Meu álbum</span></span>
+        <h2 id="aTitle">0 / 0 figurinhas</h2>
+      </div>
+      <button class="cta" data-go="jogar">Abrir figurinha →</button>
+      <div class="prog" id="aProg"></div>
+    </div>
+    <div id="aSecoes"></div>
+  </section>
+
+</main>
+
+<footer>
+  <p><button class="link" data-erro="">⚑ Encontrou algum erro? Avise a gente</button></p>
+  <p>Os nomes e referências a clubes de futebol são utilizados exclusivamente para fins de identificação dentro da simulação. Esta plataforma não é afiliada, patrocinada nem endossada pelos clubes mencionados, salvo indicação expressa em contrário.</p>
+  <p id="fData">RODADO · projeto de fã sem fins comerciais · carreiras e escudos via Wikipedia</p>
+</footer>
+
+<dialog id="help">
+  <button class="dlg-x" aria-label="Fechar" onclick="this.closest('dialog').close()">×</button>
+  <h2>Como jogar</h2>
+  <h3>Álbum · modo principal</h3>
+  <p>A carreira inteira do craque aparece de uma vez, com os escudos em ordem. Você tem <b>4 chutes</b>. A cada erro ganha uma pista: <b>nacionalidade</b>, <b>posição</b> e <b>iniciais</b>.</p>
+  <p>Acertou? A figurinha é <b>colada no álbum</b>. Errou? Ela volta pro bolo e pode aparecer de novo. As figurinhas saem no sorteio — não dá pra escolher qual.</p>
+  <h3>Níveis</h3>
+  <p><b>Fácil</b>, <b>Médio</b>, <b>Difícil</b> e <b>Insano</b> dividem os 120 jogadores mais bem avaliados do game pela fama (quanto mais conhecido, mais fácil). <b>Lendas</b> tem só aposentados e lendas vivas do futebol.</p>
+  <h3>Desafio do dia</h3>
+  <p>Mesmo craque pra todo mundo. Só o <b>primeiro clube</b> aparece; cada erro revela o próximo. São <b>6 chutes</b>. Acertando, a figurinha também vai pro álbum.</p>
+  <p class="eyebrow" style="margin:16px 0 18px">EMP. = empréstimo</p>
+  <form method="dialog"><button class="cta">Bora jogar →</button></form>
+</dialog>
+
+<dialog id="verFig">
+  <button class="dlg-x" aria-label="Fechar" onclick="this.closest('dialog').close()">×</button>
+  <div class="ver" id="verBody"></div>
+</dialog>
+
+<dialog id="erro">
+  <button class="dlg-x" aria-label="Fechar" onclick="this.closest('dialog').close()">×</button>
+  <h2>Encontrou algum erro?</h2>
+  <div class="sobre" id="erroSobre"></div>
+  <form class="form" id="erroForm">
+    <label for="erroTipo">O que está errado?</label>
+    <select id="erroTipo">
+      <option>Clube ou ano errado na carreira</option>
+      <option>Escudo errado</option>
+      <option>Nome, nacionalidade ou posição</option>
+      <option>Faltou um jogador no jogo</option>
+      <option>Problema no jogo (bug)</option>
+      <option>Outro</option>
+    </select>
+    <label for="erroTexto">Detalhes</label>
+    <textarea id="erroTexto" placeholder="Ex.: ele jogou no Clube X de 2015 a 2017, não de 2016 a 2017."></textarea>
+    <div class="btns"><button class="cta" type="submit" id="erroEnviar">Enviar →</button></div>
+    <p class="hint" id="erroHint"></p>
+  </form>
+</dialog>
+
+<script src="dados.js"></script>
+<script>
+/* =========================================================
+   DADOS (gerados por ferramentas/gerar-dados.mjs)
+   ========================================================= */
+const { clubes:CLUBES, jogadores:JOGADORES, atualizado } = window.TRAJ;
+
+// Níveis: os 120 do Top OVR divididos por fama (visitas na Wikipedia); Lendas = aposentados e lendas vivas
+const NIVEIS = [
+  ['facil',   'Fácil',   'Os craques que todo mundo conhece',             '#4ADE80'],
+  ['medio',   'Médio',   'Titulares de seleção e de clube grande',        '#FACC15'],
+  ['dificil', 'Difícil', 'Pra quem acompanha o futebol europeu',          '#FB923C'],
+  ['insano',  'Insano',  'Só quem vê jogo de madrugada acerta',           '#FF5A4E'],
+  ['lendas',  'Lendas',  'Aposentados e lendas vivas do futebol',         '#C9A7FF'],
+];
+const NIVEL = Object.fromEntries(NIVEIS.map(([k, nome, desc, cor], i) => [k, { k, nome, desc, cor, i }]));
+for (const p of JOGADORES) if (!NIVEL[p.nivel]) p.nivel = p.sec === 'top' ? 'medio' : 'lendas';
+// numeração do álbum segue a ordem dos níveis (dentro de cada nível, por OVR)
+JOGADORES.sort((a, b) => NIVEL[a.nivel].i - NIVEL[b.nivel].i);
+JOGADORES.forEach((p, i) => { p.num = i + 1; });
+const SIGLA = { 'Atacante':'ATA','Ponta-esquerda':'PE','Ponta-direita':'PD','Meia':'MEI','Meio-campo':'MC','Volante':'VOL',
+  'Zagueiro':'ZAG','Lateral-esquerdo':'LE','Lateral-direito':'LD','Goleiro':'GOL','Meia-esquerda':'ME','Meia-direita':'MD' };
+
+// Nomes extras no autocompletar, pra resposta não ficar óbvia pela lista
+const DECOYS = `Pelé|Romário|Rivaldo|Roberto Carlos|Cafu|Adriano Imperador|Robinho|Zico|Bebeto|Juninho Pernambucano|Fred|Paulo Henrique Ganso|Oscar|Willian|Douglas Costa|Diego Costa|Deco|Alexandre Pato|Roberto Firmino|Richarlison|Lucas Paquetá|Endrick|Estêvão|Savinho|Gabriel Jesus|Gabriel Martinelli|Antony|Danilo|Alex Sandro|Ederson|Bento|João Pedro|Igor Thiago|Gerson|Pedro|Luiz Henrique|Giorgian de Arrascaeta|Marcelo|Daniel Alves|Diego Maradona|Carlos Tevez|Gonzalo Higuaín|Juan Román Riquelme|Gabriel Batistuta|Javier Mascherano|Sergio Agüero|Rodrigo De Paul|Cristian Romero|Nicolás Otamendi|Lisandro Martínez|Alejandro Garnacho|Nahuel Molina|Diego Forlán|Darwin Núñez|Ronald Araújo|Manuel Ugarte|Luís Figo|Ricardo Quaresma|Nani|Bernardo Silva|Pepe|Rui Costa|Eusébio|João Félix|Rafael Leão|Gonçalo Ramos|João Cancelo|Thierry Henry|Zinedine Zidane|Patrick Vieira|Michel Platini|David Trezeguet|Franck Ribéry|Kingsley Coman|Theo Hernández|Andrés Iniesta|Xavi Hernández|Iker Casillas|Fernando Torres|David Villa|Raúl González|Carles Puyol|Gerard Piqué|Sergio Busquets|Jordi Alba|Gavi|Dani Carvajal|Álvaro Morata|Mikel Oyarzabal|Arda Güler|Wayne Rooney|Steven Gerrard|Frank Lampard|Michael Owen|Paul Scholes|Alan Shearer|Raheem Sterling|Marcus Rashford|Jadon Sancho|Mason Mount|Jack Grealish|Kyle Walker|John Stones|Trent Alexander-Arnold|Andrew Robertson|Andrea Pirlo|Paolo Maldini|Francesco Totti|Alessandro Del Piero|Gianluigi Buffon|Fabio Cannavaro|Roberto Baggio|Christian Vieri|Filippo Inzaghi|Federico Chiesa|Dušan Vlahović|Ciro Immobile|Toni Kroos|Manuel Neuer|Mesut Özil|Miroslav Klose|Bastian Schweinsteiger|Michael Ballack|Leroy Sané|Serge Gnabry|Kai Havertz|İlkay Gündoğan|Arjen Robben|Ruud van Nistelrooy|Clarence Seedorf|Patrick Kluivert|Robin van Persie|Wesley Sneijder|Johan Cruyff|Edgar Davids|Marco van Basten|Ruud Gullit|Cody Gakpo|Xavi Simons|Romelu Lukaku|Eden Hazard|Thibaut Courtois|Ivan Rakitić|Samuel Eto'o|Didier Drogba|Yaya Touré|Gareth Bale|Andriy Shevchenko|Radamel Falcao|Pavel Nedvěd|Henrik Larsson|Hristo Stoichkov|George Weah|Alexis Sánchez|Arturo Vidal|Alphonso Davies|Rafael Márquez|Hirving Lozano|Takefusa Kubo|Kaoru Mitoma|Jan Vertonghen`.split('|');
+
+/* =========================================================
+   UTIL
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const byId = Object.fromEntries(JOGADORES.map(p => [p.id, p]));
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const store = {
+  get(k){ try{ return JSON.parse(localStorage.getItem('trj2:'+k)); }catch{ return null; } },
+  set(k,v){ try{ localStorage.setItem('trj2:'+k, JSON.stringify(v)); }catch{} },
+};
+const clube = id => CLUBES[id] || { n:id, img:null };
+const yrs = ([, a, b]) => b === null ? `${a}–hoje` : a === b ? `${a}` : `${a}–${b}`;
+const pad = n => String(n).padStart(3, '0');
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const iniciais = nome => nome.split(/\s+/).map(w => w[0] + '·'.repeat(Math.max(0, w.length - 1))).join(' ');
+// clube atual = passagem em aberto; se aposentado, a que terminou por último (empréstimos vêm listados depois do clube dono)
+const clubeAtual = p => (p.carreira.find(c => c[2] === null) || p.carreira.reduce((a, c) => c[2] >= a[2] ? c : a))[0];
+const tier = p => p.sec === 'lenda' ? 'lenda' : p.sec === 'eterno' ? 'idolo' : p.ovr >= 89 ? 'elite' : p.ovr >= 86 ? 'ouro' : 'prata';
+
+// escudo sempre num disco branco: muitos escudos são escuros e sumiriam no fundo preto
+function crestImg(id){
+  const c = clube(id);
+  return `<span class="cw">${c.img
+    ? `<img src="${c.img}" alt="Escudo do ${esc(c.n)}">`
+    : `<span class="fallback" aria-label="${esc(c.n)}">${esc(c.n[0])}</span>`}</span>`;
+}
+
+function figHTML(p, { big = false, tag = 'div', extra = '' } = {}){
+  const c = clube(clubeAtual(p));
+  const topo = p.sec === 'top' ? `${p.ovr}<small>${SIGLA[p.pos] || ''}</small>` : `★<small>${p.sec === 'lenda' ? 'LENDA' : 'ÍDOLO'}</small>`;
+  return `<${tag} class="fig ${tier(p)}${big ? ' grande' : ''} ${extra}" ${tag === 'button' ? `data-ver="${p.id}" aria-label="Figurinha ${p.num}: ${esc(p.nome)}"` : ''}>
+    <span class="fo">${topo}</span><span class="fn">#${pad(p.num)}</span>
+    <span class="fc">${c.img ? `<img src="${c.img}" alt="" loading="lazy">` : `<span>${esc(c.n[0])}</span>`}</span>
+    <span class="fnome">${esc(p.nome)}</span><span class="fp">${esc(p.pais || '')}</span>
+  </${tag}>`;
+}
+
+const ENTRIES = (() => {
+  const vistos = new Set();
+  const out = JOGADORES.map(p => {
+    const keys = [p.nome, ...(p.apelidos || [])].map(norm);
+    keys.forEach(k => vistos.add(k));
+    return { id:p.id, nome:p.nome, keys };
+  });
+  for (const n of DECOYS) if (!vistos.has(norm(n))) { vistos.add(norm(n)); out.push({ id:'x:' + norm(n), nome:n, keys:[norm(n)] }); }
+  return out.sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
+})();
+
+function search(q){
+  q = norm(q);
+  if (q.length < 2) return [];
+  const scored = [];
+  for (const e of ENTRIES) {
+    let s = 9;
+    for (const k of e.keys) {
+      if (k.startsWith(q)) s = Math.min(s, 0);
+      else if (k.split(' ').some(w => w.startsWith(q))) s = Math.min(s, 1);
+      else if (k.includes(q)) s = Math.min(s, 2);
+    }
+    if (s < 9) scored.push([s, e]);
+  }
+  return scored.sort((a, b) => a[0] - b[0]).slice(0, 6).map(x => x[1]);
+}
+
+/* ---------- desafio do dia: sorteio fixo entre craques com 4+ clubes ---------- */
+const LAUNCH = new Date(2026, 9, 1); // 1º de outubro de 2026 = desafio #1
+const ORDEM_DIA = (() => {
+  let s = 20261001;
+  const rnd = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const a = JOGADORES.filter(p => p.carreira.length >= 4).map(p => p.id).sort();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  const abertura = 'zlatan-ibrahimovic'; // desafio #1
+  return a.includes(abertura) ? [abertura, ...a.filter(id => id !== abertura)] : a;
+})();
+
+function dayInfo(now = new Date()){
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const idx = Math.round((today - LAUNCH) / 86400000);
+  const pid = ORDEM_DIA[((idx % ORDEM_DIA.length) + ORDEM_DIA.length) % ORDEM_DIA.length];
+  const key = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const label = new Intl.DateTimeFormat('pt-BR', { weekday:'long', day:'numeric', month:'long' }).format(today);
+  return { num:idx + 1, pid, key, label };
+}
+
+function toast(t){
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = t; el.setAttribute('role','status');
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1800);
+}
+
+/* =========================================================
+   ESTADO
+   ========================================================= */
+const MODOS = {
+  album: { max:4, progressivo:false, extras:[['Nacionalidade','pais',1],['Posição','pos',2],['Iniciais','ini',3]] },
+  daily: { max:6, progressivo:true,  extras:[['Nacionalidade','pais',3],['Posição','pos',4],['Iniciais','ini',5]] },
+};
+const GOALS = ['Golaço!','Gol de placa!','Bola na rede!','Gol!','No rebote!','No último lance!'];
+
+let G = null;                        // partida atual
+let colecao = store.get('album') || {}; // { id: { t, via } }
+let destaque = null;                 // figurinha recém-colada, pra piscar no álbum
+let ultimaPerdida = null;
+let nivel = NIVEL[store.get('nivel')] ? store.get('nivel') : 'facil';
+
+const errors = () => G.guesses.filter(g => g !== G.player.id).length;
+const coladas = () => JOGADORES.filter(p => colecao[p.id]).length;
+const doNivel = k => JOGADORES.filter(p => p.nivel === k);
+const coladasNivel = k => doNivel(k).filter(p => colecao[p.id]).length;
+const chaveRodada = () => 'rodada-' + nivel; // cada nível guarda sua figurinha em andamento
+
+function escolherNivel(k){
+  if (!NIVEL[k]) return;
+  nivel = k;
+  store.set('nivel', k);
+}
+
+function colar(id, via){
+  if (colecao[id]) return false;
+  colecao[id] = { t:Date.now(), via };
+  store.set('album', colecao);
+  destaque = id;
+  return true;
+}
+
+// sorteia uma figurinha ainda não colada do nível escolhido (não dá pra escolher qual)
+function newAlbumRound(){
+  let r = store.get(chaveRodada());
+  if (!r || !byId[r.id] || colecao[r.id] || byId[r.id].nivel !== nivel) {
+    const faltam = doNivel(nivel).filter(p => !colecao[p.id]);
+    if (!faltam.length) { G = null; return; }
+    const pool = faltam.length > 1 ? faltam.filter(p => p.id !== ultimaPerdida) : faltam;
+    r = { id:pick(pool).id, guesses:[] };
+  }
+  store.set(chaveRodada(), r);
+  G = { mode:'album', cfg:MODOS.album, player:byId[r.id], guesses:r.guesses, done:false, won:false, shown:0,
+        label:`Nível ${NIVEL[nivel].nome} · Figurinha misteriosa` };
+}
+
+function newDaily(){
+  const d = dayInfo();
+  const saved = store.get('d:' + d.key);
+  const ok = saved?.pid === d.pid;
+  G = { mode:'daily', cfg:MODOS.daily, player:byId[d.pid], guesses:ok ? saved.guesses : [], done:ok && saved.done, won:ok && saved.won,
+        label:`Desafio #${d.num} · ${d.label}`, num:d.num, key:d.key, shown:0 };
+}
+
+function persist(){
+  if (G.mode === 'daily') {
+    store.set('d:' + G.key, { pid:G.player.id, guesses:G.guesses, done:G.done, won:G.won });
+    if (G.done) { recordStats(); if (G.won) colar(G.player.id, 'desafio'); }
+  } else {
+    if (!G.done) store.set(chaveRodada(), { id:G.player.id, guesses:G.guesses });
+    else {
+      store.set(chaveRodada(), null);
+      if (G.won) colar(G.player.id, 'album'); else ultimaPerdida = G.player.id;
+    }
+  }
+}
+
+function getStats(){ return store.get('stats') || { played:0, won:0, cur:0, max:0, dist:[0,0,0,0,0,0], last:null }; }
+function recordStats(){
+  const s = getStats();
+  if (s.last === G.num) return;
+  s.played++;
+  if (G.won) {
+    s.won++; s.dist[G.guesses.length - 1]++;
+    s.cur = (s.lastWin === G.num - 1) ? s.cur + 1 : 1;
+    s.lastWin = G.num;
+    s.max = Math.max(s.max, s.cur);
+  } else s.cur = 0;
+  s.last = G.num;
+  store.set('stats', s);
+}
+
+/* =========================================================
+   RENDER — JOGO
+   ========================================================= */
+function renderGame(){
+  const p = G.player, err = errors(), cfg = G.cfg;
+  const reveal = G.done || !cfg.progressivo ? p.carreira.length : Math.min(p.carreira.length, 1 + err);
+  $('#board').hidden = false;
+  $('#gLabel').textContent = G.label;
+
+  $('#balls').innerHTML = Array.from({ length:cfg.max }, (_, i) => {
+    const g = G.guesses[i];
+    return `<span class="ball ${g === undefined ? '' : g === p.id ? 'hit' : 'used'}"></span>`;
+  }).join('');
+  $('#balls').setAttribute('aria-label', `${cfg.max - G.guesses.length} chutes restantes`);
+
+  const first = Math.min(...p.carreira.map(c => c[1]));
+  const fim = p.carreira.some(c => c[2] === null) ? 'hoje' : Math.max(...p.carreira.map(c => c[2]));
+  $('#gMeta').innerHTML = `<b>${p.carreira.length}</b> passagens · ${first} → ${fim}`;
+
+  $('#slots').innerHTML = p.carreira.map((c, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    if (i >= reveal) return `<li class="slot" aria-label="Clube ${i+1} escondido"><span class="num">${num}</span><span class="q">?</span></li>`;
+    const isNew = i >= G.shown;
+    const tag = c[3] === 'emp' ? '<span class="tag">EMP.</span>' : '';
+    return `<li class="slot on${isNew ? ' new' : ''}" style="--d:${isNew ? i - G.shown : 0}">
+      <span class="num">${num}</span>${tag}${crestImg(c[0])}
+      <span class="club">${esc(clube(c[0]).n)}</span><span class="yrs">${yrs(c)}</span></li>`;
+  }).join('');
+  G.shown = reveal;
+
+  const abertas = G.extrasShown ?? cfg.extras.filter(([, , n]) => err >= n).length;
+  let ex = 0;
+  $('#extras').innerHTML = cfg.extras.map(([k, f, n]) => {
+    if (!(G.done || err >= n)) return `<div class="extra locked"><span class="k">${k}</span><span class="v">🔒 após ${n} erro${n > 1 ? 's' : ''}</span></div>`;
+    const isNew = ex++ >= abertas;
+    const v = f === 'ini' ? iniciais(p.nome) : p[f];
+    return `<div class="extra${isNew ? ' new' : ''}"><span class="k">${k}</span><span class="v${f === 'ini' ? ' ini' : ''}">${esc(v)}</span></div>`;
+  }).join('');
+  G.extrasShown = ex;
+
+  $('#history').innerHTML = G.guesses.map((g, i) => {
+    if (g === '_skip') return `<li class="skip"><span class="n">${i+1}</span><span class="who">Pulou</span><span class="ic">→ pista</span></li>`;
+    const e = ENTRIES.find(x => x.id === g), ok = g === p.id;
+    return `<li class="${ok ? 'good' : 'bad'}"><span class="n">${i+1}</span><span class="who">${esc(e ? e.nome : g)}</span><span class="ic">${ok ? '✓ acertou' : '✗ não é'}</span></li>`;
+  }).join('');
+
+  $('#skipBtn').textContent = G.mode === 'daily' ? 'Pular e revelar a próxima pista' : 'Trocar de figurinha';
+  $('#gForm').hidden = G.done;
+  $('#gSub').hidden = G.done;
+  if (!G.done) { $('#gInput').value = ''; $('#gMsg').textContent = ''; }
+  renderResult();
+}
+
+function shareText(){
+  const sq = G.guesses.map(g => g === G.player.id ? '🟩' : g === '_skip' ? '⬛' : '🟥').join('');
+  return `RODADO #${G.num} ⚽ ${G.won ? G.guesses.length : 'X'}/${G.cfg.max}\n${sq}\nDe quem é essa carreira?`;
+}
+
+function renderResult(){
+  const box = $('#result');
+  if (!G.done) { box.hidden = true; return; }
+  const p = G.player, n = G.guesses.length;
+  box.className = 'result ' + (G.won ? 'won' : 'lost');
+
+  if (G.mode === 'album') {
+    const nv = NIVEL[nivel], total = doNivel(nivel).length, tem = coladasNivel(nivel);
+    box.classList.add('lado');
+    box.innerHTML = `
+      <div class="stage">${figHTML(p, { big:true, extra:G.won ? 'new' : 'cinza' })}<span class="stamp${G.won ? '' : ' x'}">${G.won ? 'COLADA' : 'ESCAPOU'}</span></div>
+      <div class="menu">
+        <div class="eyebrow">${G.won ? `Acertou no ${n}º chute · figurinha #${pad(p.num)}` : 'Os 4 chutes acabaram'}</div>
+        <h2 class="big">${G.won ? 'Colada!' : 'Essa escapou'}</h2>
+        <p class="answer">${G.won ? 'É' : 'Era'} <b>${esc(p.nome)}</b></p>
+        <p class="note">${G.won ? `Nível ${nv.nome}: <b>${tem} de ${total}</b> figurinhas.` : 'Ela volta pro bolo — dá pra tentar de novo depois.'}</p>
+        <div class="btns"><button class="cta" id="nextBtn">${tem === total ? `Nível ${nv.nome} completo →` : 'Próxima<span class="so-largo"> figurinha</span> →'}</button>
+        ${G.won ? '<button class="cta ghost" data-go="album">Ver no álbum</button>' : ''}</div>
+        ${linkErro(p.id)}
+      </div>`;
+  } else {
+    const s = getStats(), maxD = Math.max(1, ...s.dist);
+    const sq = shareText().split('\n')[1];
+    box.innerHTML = `
+      <div class="eyebrow">${G.won ? `Acertou no ${n}º chute` : 'Os 6 chutes acabaram'}</div>
+      <h2 class="big">${G.won ? GOALS[n-1] : 'Passou em branco'}</h2>
+      <p class="answer">${G.won ? 'É' : 'Era'} <b>${esc(p.nome)}</b><br><span class="eyebrow">${esc(p.pais)} · ${esc(p.pos)}</span></p>
+      <div class="squares" aria-label="Resumo dos chutes">${sq}</div>
+      ${G.won ? `<div class="stage">${figHTML(p, { big:true })}<span class="stamp">${colecao[p.id]?.via === 'desafio' ? 'COLADA' : 'JÁ TINHA'}</span></div>` : ''}
+      <div class="btns"><button class="cta" id="shareBtn">Compartilhar</button><button class="cta ghost" data-go="jogar">Ir pro álbum →</button></div>
+      ${linkErro(p.id)}
+      <div class="stats">${statsHTML(s)}</div>
+      <div class="dist"><h3>Distribuição de chutes</h3>
+        ${s.dist.map((v, i) => `<div class="bar"><span>${i+1}</span><i class="${G.won && i === n-1 ? 'me' : ''}" style="width:${Math.max(8, v / maxD * 100)}%">${v}</i></div>`).join('')}
+      </div>
+      <span class="timer">Novo desafio em <b class="cd">--:--:--</b></span>`;
+  }
+  box.hidden = false;
+  tick();
+}
+
+// nível sem figurinhas restantes (ou o álbum inteiro)
+function renderCompleto(){
+  const nv = NIVEL[nivel], tudo = coladas() === JOGADORES.length;
+  const prox = NIVEIS.map(([k]) => NIVEL[k]).find(n => coladasNivel(n.k) < doNivel(n.k).length);
+  $('#gLabel').textContent = tudo ? 'Álbum completo' : `Nível ${nv.nome} completo`;
+  $('#balls').innerHTML = '';
+  $('#board').hidden = true;
+  $('#history').innerHTML = '';
+  $('#gForm').hidden = true; $('#gSub').hidden = true;
+  const box = $('#result');
+  box.className = 'result won';
+  box.innerHTML = tudo ? `
+    <div class="eyebrow">Todas as ${JOGADORES.length} figurinhas</div>
+    <h2 class="big">Álbum completo!</h2>
+    <p class="note">Você colou todos os craques, de todos os níveis. Respeito.</p>
+    <div class="btns"><button class="cta" data-go="album">Ver meu álbum →</button><button class="cta ghost" id="resetBtn">Zerar e recomeçar</button></div>` : `
+    <div class="eyebrow">As ${doNivel(nivel).length} figurinhas do nível</div>
+    <h2 class="big">${nv.nome} completo!</h2>
+    <p class="note">Bora pro próximo? Faltam figurinhas no nível <b>${prox.nome}</b>.</p>
+    <div class="btns"><button class="cta" data-nivel="${prox.k}" data-jogar>Jogar o ${prox.nome} →</button><button class="cta ghost" data-go="album">Ver meu álbum</button></div>`;
+  box.hidden = false;
+}
+
+/* =========================================================
+   CHUTES + AUTOCOMPLETAR
+   ========================================================= */
+let sel = -1, list = [];
+
+function openSugg(){
+  const q = $('#gInput').value;
+  list = search(q);
+  sel = list.length ? 0 : -1;
+  const ul = $('#sugg');
+  if (!list.length) { closeSugg(); return; }
+  const nq = norm(q);
+  ul.innerHTML = list.map((e, i) => {
+    const dup = G.guesses.includes(e.id);
+    const nn = norm(e.nome), at = nn.indexOf(nq);
+    const name = at >= 0 && e.nome.length === nn.length
+      ? esc(e.nome.slice(0, at)) + '<mark>' + esc(e.nome.slice(at, at + nq.length)) + '</mark>' + esc(e.nome.slice(at + nq.length))
+      : esc(e.nome);
+    return `<li role="option" id="opt${i}" data-i="${i}" class="${dup ? 'dup' : ''}" aria-selected="${i === sel}">${name}${dup ? ' · já chutou' : ''}</li>`;
+  }).join('');
+  ul.hidden = false;
+  $('#gInput').setAttribute('aria-expanded','true');
+  $('#gInput').setAttribute('aria-activedescendant','opt0');
+}
+function closeSugg(){ $('#sugg').hidden = true; $('#gInput').setAttribute('aria-expanded','false'); sel = -1; }
+function moveSel(d){
+  if (!list.length) return;
+  sel = (sel + d + list.length) % list.length;
+  [...$('#sugg').children].forEach((li, i) => li.setAttribute('aria-selected', i === sel));
+  $('#sugg').children[sel]?.scrollIntoView({ block:'nearest' });
+  $('#gInput').setAttribute('aria-activedescendant','opt' + sel);
+}
+
+function fail(t){
+  $('#gMsg').textContent = t;
+  const f = $('#gInput'); f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
+  f.select();
+}
+
+function afterMove(){
+  persist();
+  renderGame();
+  if (!G.done) $('#gInput').focus();
+  else $('#result').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function guess(entry){
+  if (!G || G.done) return;
+  if (G.guesses.includes(entry.id)) return fail('Você já chutou esse.');
+  G.guesses.push(entry.id);
+  if (entry.id === G.player.id) { G.done = true; G.won = true; }
+  else if (errors() >= G.cfg.max) G.done = true;
+  closeSugg();
+  afterMove();
+}
+
+function skip(){
+  if (!G || G.done) return;
+  if (G.mode === 'album') {
+    ultimaPerdida = G.player.id;
+    store.set(chaveRodada(), null);
+    newAlbumRound();
+    if (G) renderGame(); else renderCompleto();
+    window.scrollTo({ top:0, behavior:'smooth' });
+    return;
+  }
+  G.guesses.push('_skip');
+  if (errors() >= G.cfg.max) G.done = true;
+  afterMove();
+}
+
+$('#gInput').addEventListener('input', () => { $('#gMsg').textContent = ''; openSugg(); });
+$('#gInput').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); if ($('#sugg').hidden) openSugg(); else moveSel(1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); moveSel(-1); }
+  else if (e.key === 'Escape') closeSugg();
+});
+$('#gInput').addEventListener('blur', () => setTimeout(closeSugg, 150));
+$('#sugg').addEventListener('mousedown', e => {
+  const li = e.target.closest('li'); if (!li) return;
+  e.preventDefault();
+  guess(list[+li.dataset.i]);
+});
+$('#gForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const q = norm($('#gInput').value);
+  if (!q) return fail('Digite um nome.');
+  if (!$('#sugg').hidden && list[sel]) return guess(list[sel]);
+  const exact = ENTRIES.find(x => x.keys.includes(q));
+  if (exact) return guess(exact);
+  const opts = search(q);
+  if (opts.length === 1) return guess(opts[0]);
+  fail(opts.length ? 'Escolha um nome da lista.' : 'Jogador não encontrado na lista.');
+});
+$('#skipBtn').addEventListener('click', skip);
+
+/* =========================================================
+   INÍCIO / ÁLBUM / NAVEGAÇÃO
+   ========================================================= */
+function statsHTML(s){
+  const pct = s.played ? Math.round(s.won / s.played * 100) : 0;
+  return `<div><b>${s.played}</b><span>Jogos</span></div><div><b>${pct}%</b><span>Vitórias</span></div>
+          <div><b>${s.cur}</b><span>Sequência</span></div><div><b>${s.max}</b><span>Recorde</span></div>`;
+}
+
+function progHTML(tem, total){
+  const pct = Math.round(tem / total * 100);
+  return `<div class="prog-bar" role="progressbar" aria-valuenow="${tem}" aria-valuemax="${total}"><i style="width:${pct}%"></i></div>
+          <div class="prog-txt"><span><b>${tem}</b> de ${total} figurinhas</span><span>${pct}%</span></div>`;
+}
+
+function niveisHTML(){
+  return NIVEIS.map(([k, nome, , cor]) => {
+    const tem = coladasNivel(k), total = doNivel(k).length;
+    return `<button class="nivel${tem === total ? ' feito' : ''}" role="radio" aria-checked="${k === nivel}" data-nivel="${k}" style="--c:${cor}">
+      <i></i><b>${nome}</b><small>${tem === total ? '✓ ' : ''}${tem}/${total}</small></button>`;
+  }).join('');
+}
+
+function renderHome(){
+  const nv = NIVEL[nivel], tem = coladasNivel(nivel), total = doNivel(nivel).length;
+  $('#hNiveis').innerHTML = niveisHTML();
+  $('#hNivelDesc').textContent = nv.desc;
+  $('#hProg').innerHTML = progHTML(tem, total);
+  // espia: as últimas coladas do nível ou espaços vazios
+  const ultimas = doNivel(nivel).filter(p => colecao[p.id]).sort((a, b) => colecao[b.id].t - colecao[a.id].t).slice(0, 3);
+  $('#hPeek').innerHTML = [...ultimas.map(p => figHTML(p)), ...Array.from({ length:3 - ultimas.length }, () => '<div class="vazio"><span class="vq">?</span></div>')].join('');
+  $('#hCta').textContent = store.get(chaveRodada()) ? 'Continuar figurinha →' : tem === total ? `${nv.nome} completo ✓` : 'Abrir figurinha →';
+
+  const d = dayInfo();
+  $('#hDate').textContent = `Desafio do dia #${d.num}`;
+  $('#hDia').textContent = d.label.charAt(0).toUpperCase() + d.label.slice(1);
+  const saved = store.get('d:' + d.key), ok = saved?.pid === d.pid;
+  const st = $('#hStatus');
+  st.className = 'status' + (ok && saved.done ? (saved.won ? ' ok' : ' x') : '');
+  st.textContent = ok && saved.done ? (saved.won ? `✓ ${saved.guesses.length}/6` : '✗ Hoje não') : ok && saved.guesses.length ? 'Continuar' : 'Jogar';
+  $('#hStats').innerHTML = statsHTML(getStats());
+}
+
+function renderAlbum(){
+  const tem = coladas(), total = JOGADORES.length;
+  $('#aTitle').textContent = `${tem} / ${total} figurinhas`;
+  $('#aProg').innerHTML = progHTML(tem, total);
+  $('#aSecoes').innerHTML = NIVEIS.map(([k, nome, desc, cor]) => {
+    const ps = doNivel(k), n = coladasNivel(k);
+    return `<section class="secao" style="--c:${cor}">
+      <div class="secao-t">
+        <div><h3><i class="dot"></i>${nome}</h3><small>${desc}</small></div>
+        <div class="secao-r"><span class="ct">${n}/${ps.length}</span>${n < ps.length ? `<button class="link" data-nivel="${k}" data-jogar>Jogar esse nível →</button>` : ''}</div>
+      </div>
+      <div class="figs">${ps.map(p => colecao[p.id]
+        ? figHTML(p, { tag:'button', extra:p.id === destaque ? 'pulse' : '' })
+        : `<div class="vazio" aria-label="Figurinha ${p.num}, ainda não colada"><span class="vn">${pad(p.num)}</span><span class="vq">?</span></div>`).join('')}</div>
+    </section>`;
+  }).join('');
+  if (destaque) {
+    const id = destaque;
+    destaque = null;
+    requestAnimationFrame(() => document.querySelector(`[data-ver="${id}"]`)?.scrollIntoView({ block:'center' }));
+  }
+}
+
+function verFigurinha(id){
+  const p = byId[id], info = colecao[id];
+  const quando = info ? new Intl.DateTimeFormat('pt-BR', { day:'numeric', month:'short' }).format(info.t) : '';
+  $('#verBody').innerHTML = `${figHTML(p, { big:true })}
+    <div class="eyebrow" style="margin-bottom:12px">${esc(p.pais)} · ${esc(p.pos)}${p.ovr ? ` · OVR ${p.ovr}` : ''}${info ? ` · colada em ${quando}${info.via === 'desafio' ? ' (desafio)' : ''}` : ''}</div>
+    <ul class="mini">${p.carreira.map(c => `<li>${crestImg(c[0])}<span><b>${esc(clube(c[0]).n)}${c[3] === 'emp' ? ' · emp.' : ''}</b><small>${yrs(c)}</small></span></li>`).join('')}</ul>
+    ${linkErro(p.id)}`;
+  $('#verFig').showModal();
+}
+
+/* ---------- relato de erros ----------
+   Coloque em CONTATO_ERROS o e-mail que deve receber os relatos. Vazio = o relato é copiado pra área de transferência. */
+const CONTATO_ERROS = '';
+let erroDe = null;
+
+const linkErro = id => `<button class="link erro-link" data-erro="${id}">⚑ Encontrou algum erro nessa carreira?</button>`;
+
+function abrirErro(id){
+  erroDe = byId[id] || null;
+  document.querySelectorAll('dialog[open]').forEach(d => d.close());
+  $('#erroSobre').innerHTML = erroDe
+    ? `${crestImg(clubeAtual(erroDe))}<span>Sobre <b>${esc(erroDe.nome)}</b> · figurinha #${pad(erroDe.num)}</span>`
+    : '<span>Conta pra gente o que está errado: jogador, clube, ano, escudo…</span>';
+  $('#erroTipo').selectedIndex = erroDe ? 0 : 4;
+  $('#erroTexto').value = '';
+  $('#erroEnviar').textContent = CONTATO_ERROS ? 'Enviar por e-mail →' : 'Copiar relato →';
+  $('#erroHint').textContent = CONTATO_ERROS ? 'Abre seu app de e-mail com o relato já preenchido.' : 'O relato vai ser copiado pra você colar e enviar.';
+  $('#erro').showModal();
+  $('#erroTexto').focus();
+}
+
+function textoErro(){
+  const p = erroDe;
+  return [
+    `Tipo: ${$('#erroTipo').value}`,
+    p && `Jogador: ${p.nome} (#${pad(p.num)} · ${p.id})`,
+    p && `Carreira no jogo: ${p.carreira.map(c => `${clube(c[0]).n} ${yrs(c)}${c[3] === 'emp' ? ' (emp.)' : ''}`).join(' → ')}`,
+    '',
+    $('#erroTexto').value.trim() || '(sem detalhes)',
+    '',
+    `Dados de ${atualizado} · ${navigator.userAgent}`,
+  ].filter(l => l !== null && l !== undefined && l !== false).join('\n');
+}
+
+$('#erroForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const assunto = `[Rodado] ${$('#erroTipo').value}${erroDe ? ` · ${erroDe.nome}` : ''}`;
+  const corpo = textoErro();
+  if (CONTATO_ERROS) {
+    location.href = `mailto:${CONTATO_ERROS}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+  } else {
+    try { await navigator.clipboard.writeText(`${assunto}\n\n${corpo}`); }
+    catch { prompt('Copie o relato:', `${assunto}\n\n${corpo}`); }
+  }
+  $('#erro').close();
+  toast('Valeu! Relato pronto 🙌');
+});
+
+function show(view){
+  const v = view === 'desafio' || view === 'jogar' ? 'game' : view;
+  for (const s of ['home','game','album']) $('#v-' + s).hidden = s !== v;
+  document.querySelectorAll('nav .pill[data-go]').forEach(b => b.setAttribute('aria-current', b.dataset.go === view || (view === 'jogar' && b.dataset.go === 'album') ? 'page' : 'false'));
+  $('#navCount').textContent = coladas();
+
+  if (view === 'home') renderHome();
+  if (view === 'album') renderAlbum();
+  if (view === 'desafio') { newDaily(); renderGame(); }
+  if (view === 'jogar') { newAlbumRound(); if (G) renderGame(); else renderCompleto(); }
+  window.scrollTo({ top:0 });
+  if (v === 'game' && G && !G.done && matchMedia('(pointer:fine)').matches) $('#gInput').focus();
+}
+
+function go(view){
+  const h = view === 'home' ? '' : '#' + view;
+  if (location.hash !== h) history.pushState(null, '', h || location.pathname);
+  show(view);
+}
+
+document.addEventListener('click', async e => {
+  const t = e.target;
+  const g = t.closest('[data-go]');
+  if (g) { if (g.closest('dialog')) g.closest('dialog').close(); return go(g.dataset.go); }
+  const nv = t.closest('[data-nivel]');
+  if (nv) {
+    escolherNivel(nv.dataset.nivel);
+    return nv.hasAttribute('data-jogar') ? go('jogar') : renderHome();
+  }
+  const ver = t.closest('[data-ver]');
+  if (ver) return verFigurinha(ver.dataset.ver);
+  const erro = t.closest('[data-erro]');
+  if (erro) return abrirErro(erro.dataset.erro);
+  if (t.closest('#nextBtn')) {
+    newAlbumRound();
+    if (G) renderGame(); else renderCompleto();
+    $('#navCount').textContent = coladas();
+    window.scrollTo({ top:0, behavior:'smooth' });
+    if (G && matchMedia('(pointer:fine)').matches) $('#gInput').focus();
+    return;
+  }
+  if (t.closest('#shareBtn')) {
+    const txt = shareText();
+    try { await navigator.clipboard.writeText(txt); toast('Copiado! Cola no grupo 📋'); }
+    catch { prompt('Copie o resultado:', txt); }
+    return;
+  }
+  if (t.closest('#resetBtn') && confirm('Zerar o álbum e começar do zero?')) {
+    colecao = {}; store.set('album', colecao);
+    for (const [k] of NIVEIS) store.set('rodada-' + k, null);
+    escolherNivel('facil');
+    go('jogar');
+  }
+});
+$('#helpBtn').addEventListener('click', () => $('#help').showModal());
+for (const d of document.querySelectorAll('dialog')) d.addEventListener('click', e => { if (e.target === d) d.close(); });
+
+/* contagem regressiva */
+let lastKey = dayInfo().key;
+function tick(){
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const s = Math.max(0, Math.floor((next - now) / 1000));
+  const t = [Math.floor(s / 3600), Math.floor(s % 3600 / 60), s % 60].map(n => String(n).padStart(2, '0')).join(':');
+  document.querySelectorAll('.cd').forEach(el => el.textContent = t);
+  const k = dayInfo().key;
+  if (k !== lastKey) { lastKey = k; if (!$('#v-home').hidden) renderHome(); }
+}
+setInterval(tick, 1000);
+
+/* início */
+$('#fData').textContent = `RODADO · projeto de fã sem fins comerciais · carreiras e escudos via Wikipedia (atualizado em ${atualizado.split('-').reverse().join('/')}) · OVR conforme a lista do game`;
+const route = () => { const h = location.hash.slice(1); show(['desafio','jogar','album'].includes(h) ? h : 'home'); };
+window.addEventListener('popstate', route);
+route();
+tick();
+if (!store.get('seenHelp')) { store.set('seenHelp', true); $('#help').showModal(); }
+</script>
+</body>
+</html>
